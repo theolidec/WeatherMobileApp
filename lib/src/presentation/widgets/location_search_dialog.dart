@@ -195,7 +195,7 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
       
       // Close the dialog only after successful fetch
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(location);
       }
     } catch (e, stackTrace) {
       debugPrint('Error selecting location: $e');

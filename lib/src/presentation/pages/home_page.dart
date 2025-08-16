@@ -128,7 +128,13 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => const LocationSearchDialog(),
-    );
+    ).then((location) {
+      // This will be called when the dialog is closed with a location
+      if (location != null) {
+        // Trigger refresh when a new location is selected
+        _onRefresh();
+      }
+    });
   }
 
   @override
