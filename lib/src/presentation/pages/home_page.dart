@@ -194,42 +194,9 @@ class _HomePageState extends State<HomePage> {
                       onPressed: _showLocationSearchDialog,
                       tooltip: 'Search location',
                     ),
-                    // Refresh button
-                    IconButton(
-                      icon: weatherProvider.isLoading
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Theme.of(context).colorScheme.onBackground,
-                              ),
-                            )
-                          : Icon(
-                              Icons.refresh,
-                              color: Theme.of(context).colorScheme.onBackground,
-                            ),
-                      onPressed: weatherProvider.isLoading ? null : _onRefresh,
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(),
-                    ),
-                    const SizedBox(width: 4),
-                    // Settings button
-                    IconButton(
-                      icon: Icon(Icons.settings, 
-                        color: Theme.of(context).colorScheme.onBackground,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsPage(),
-                          ),
-                        );
-                      },
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(),
-                    ),
+
+                    const SizedBox(width: 1),
+                    
                     // Location text with tap to search
                     Expanded(
                       child: InkWell(
@@ -249,6 +216,22 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
+                    ), //
+                    // Settings button
+                    IconButton(
+                      icon: Icon(Icons.settings, 
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsPage(),
+                          ),
+                        );
+                      },
+                      padding: const EdgeInsets.all(8),
+                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
