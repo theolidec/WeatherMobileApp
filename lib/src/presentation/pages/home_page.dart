@@ -137,12 +137,17 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 // Location bar with refresh and settings buttons
                 Row(
                   children: [
@@ -270,7 +275,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
