@@ -80,18 +80,38 @@ class SettingsPage extends StatelessWidget {
           _buildSectionHeader('Appearance'),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, _) {
-              return ListTile(
-                title: const Text('Dark Mode'),
-                trailing: Switch(
-                  value: themeProvider.themeMode == ThemeMode.dark,
-                  onChanged: (value) {
-                    themeProvider.setThemeMode(
-                      value ? ThemeMode.dark : ThemeMode.light,
-                    );
-                  },
-                ),
-                onTap: () {
-                  themeProvider.toggleTheme();
+              String getThemeModeName(ThemeMode mode) {
+                switch (mode) {
+                  case ThemeMode.system:
+                    return 'System';
+                  case ThemeMode.light:
+                    return 'Light';
+                  case ThemeMode.dark:
+                    return 'Dark';
+                }
+              }
+              
+              return _buildUnitSelectionTile(
+                context: context,
+                title: 'Theme',
+                currentValue: getThemeModeName(themeProvider.themeMode),
+                options: const ['System', 'Light', 'Dark'],
+                onSelected: (value) {
+                  ThemeMode mode;
+                  switch (value) {
+                    case 'System':
+                      mode = ThemeMode.system;
+                      break;
+                    case 'Light':
+                      mode = ThemeMode.light;
+                      break;
+                    case 'Dark':
+                      mode = ThemeMode.dark;
+                      break;
+                    default:
+                      mode = ThemeMode.system;
+                  }
+                  themeProvider.setThemeMode(mode);
                 },
               );
             },
