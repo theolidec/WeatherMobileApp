@@ -62,27 +62,64 @@ class _HomePageState extends State<HomePage> {
     double? latitude,
     double? longitude,
     String? locationName,
+    bool forceRefresh = false,
   }) async {
+    if (!context.mounted) return;
+    
+    debugPrint('_loadWeather - forceRefresh: $forceRefresh');
     final weatherProvider = context.read<WeatherProvider>();
     await weatherProvider.fetchWeather(
       latitude: latitude,
       longitude: longitude,
       locationName: locationName,
+      forceRefresh: forceRefresh || locationName != null, // Force refresh if location name changes
     );
+    
+    // Force a rebuild after loading new weather data
+    if (context.mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _onRefresh() async {
-    final weatherProvider = context.read<WeatherProvider>();
-    final location = await _locationHistoryService.getMostRecentLocation();
-    
-    if (location != null) {
-      await _loadWeather(
-        latitude: location.latitude,
-        longitude: location.longitude,
-        locationName: location.getShortAddress(),
-      );
-    } else {
-      await weatherProvider.refreshWeather();
+    try {
+      debugPrint('Starting refresh...');
+      // Use context.mounted to check if the widget is still in the widget tree
+      if (!context.mounted) return;
+      
+      final weatherProvider = context.read<WeatherProvider>();
+      debugPrint('1. Getting most recent location...');
+      final location = await _locationHistoryService.getMostRecentLocation();
+      
+      if (location != null) {
+        debugPrint('2. Location found: ${location.getShortAddress()} (${location.latitude}, ${location.longitude})');
+        debugPrint('3. Loading weather for location...');
+        await _loadWeather(
+          latitude: location.latitude,
+          longitude: location.longitude,
+          locationName: location.getShortAddress(),
+          forceRefresh: true,  // Always force refresh on manual refresh
+        );
+      } else {
+        debugPrint('2. No location found, using refreshWeather()');
+        await weatherProvider.refreshWeather();
+        
+        // Force a rebuild after refresh
+        if (context.mounted) {
+          setState(() {});
+        }
+      }
+      debugPrint('4. Refresh completed successfully');
+    } catch (e, stackTrace) {
+      debugPrint('Error in _onRefresh: $e');
+      debugPrint('Stack trace: $stackTrace');
+      if (context.mounted) {
+        // Show error to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to refresh weather: ${e.toString()}')),
+        );
+      }
+      rethrow;
     }
   }
 

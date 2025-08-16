@@ -20,6 +20,48 @@ class WeatherModel {
   String? get locationName => _locationName;
   set locationName(String? value) => _locationName = value;
 
+  @override
+  String toString() {
+    return 'WeatherModel(' 
+        'location: $locationName, ' 
+        'temp: ${temperature.toStringAsFixed(1)}°C, ' 
+        'condition: ${_getWeatherCondition(weatherCode)}, '
+        'time: ${time.toIso8601String().substring(0, 19)}'
+        ')';
+  }
+
+  String _getWeatherCondition(int code) {
+    // Simplified weather condition based on WMO Weather interpretation codes
+    if (code < 1) return 'Clear sky';
+    if (code < 3) return 'Mainly clear';
+    if (code < 50) return 'Fog';
+    if (code < 70) return 'Drizzle';
+    if (code < 80) return 'Rain';
+    if (code < 90) return 'Snow';
+    return 'Thunderstorm';
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'temperature': temperature,
+      'apparentTemperature': apparentTemperature,
+      'precipitation': precipitation,
+      'rain': rain,
+      'showers': showers,
+      'snowfall': snowfall,
+      'weatherCode': weatherCode,
+      'cloudCover': cloudCover,
+      'windSpeed': windSpeed,
+      'windDirection': windDirection,
+      'windGusts': windGusts,
+      'relativeHumidity': relativeHumidity,
+      'time': time.toIso8601String(),
+      'locationName': locationName,
+    };
+  }
+
   WeatherModel({
     required this.latitude,
     required this.longitude,

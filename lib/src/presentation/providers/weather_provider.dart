@@ -13,7 +13,13 @@ class WeatherProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   
-  Future<void> fetchWeather({double? latitude, double? longitude, String? locationName}) async {
+  Future<void> fetchWeather({
+    double? latitude, 
+    double? longitude, 
+    String? locationName,
+    bool forceRefresh = false,
+  }) async {
+    debugPrint('WeatherProvider.fetchWeather - Starting... (lat: $latitude, lng: $longitude, name: $locationName)');
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -23,11 +29,15 @@ class WeatherProvider extends ChangeNotifier {
         latitude: latitude,
         longitude: longitude,
         locationName: locationName,
+        forceRefresh: forceRefresh,
       );
+      
+      debugPrint('WeatherProvider.fetchWeather - Received weather data: ${_currentWeather.toString()}');
       
       // Update the location name if provided
       if (locationName != null && _currentWeather != null) {
         _currentWeather!.locationName = locationName;
+        debugPrint('WeatherProvider.fetchWeather - Updated location name to: $locationName');
       }
       
       _error = null;
@@ -43,13 +53,17 @@ class WeatherProvider extends ChangeNotifier {
   }
   
   Future<void> refreshWeather() async {
+    debugPrint('WeatherProvider.refreshWeather - Starting refresh...');
     if (_currentWeather != null) {
+      debugPrint('WeatherProvider.refreshWeather - Using existing location (${_currentWeather!.locationName})');
       await fetchWeather(
         latitude: _currentWeather!.latitude,
         longitude: _currentWeather!.longitude,
+        forceRefresh: true,  // Force a fresh API call
       );
     } else {
-      await fetchWeather();
+      debugPrint('WeatherProvider.refreshWeather - No current weather, fetching default location');
+      await fetchWeather(forceRefresh: true);  // Force a fresh API call
     }
   }
 }
