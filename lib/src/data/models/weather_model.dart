@@ -15,6 +15,7 @@ class WeatherModel {
   final int windDirection;
   final double windGusts;
   final int relativeHumidity;
+  final int uvIndex;
   final DateTime time;
   String? _locationName;
   String? get locationName => _locationName;
@@ -57,6 +58,7 @@ class WeatherModel {
       'windDirection': windDirection,
       'windGusts': windGusts,
       'relativeHumidity': relativeHumidity,
+      'uvIndex': uvIndex,
       'time': time.toIso8601String(),
       'locationName': locationName,
     };
@@ -77,11 +79,12 @@ class WeatherModel {
     required this.windDirection,
     required this.windGusts,
     required this.relativeHumidity,
+    required this.uvIndex,
     required this.time,
     String? locationName,
   }) : _locationName = locationName;
 
-  factory WeatherModel.fromJson(Map<String, dynamic> json, int index) {
+  factory WeatherModel.fromJson(Map<String, dynamic> json, int index, {int uvIndex = 0}) {
     // Default coordinates if not provided
     final double latitude = json['latitude']?.toDouble() ?? 0.0;
     final double longitude = json['longitude']?.toDouble() ?? 0.0;
@@ -101,6 +104,7 @@ class WeatherModel {
       windDirection: json['winddirection_10m'][index] as int,
       windGusts: (json['windgusts_10m'][index] as num).toDouble(),
       relativeHumidity: json['relativehumidity_2m'][index] as int,
+      uvIndex: uvIndex,
       time: DateTime.parse(json['time'][index]),
     );
   }

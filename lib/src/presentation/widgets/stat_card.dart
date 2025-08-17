@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
+  final IconData? icon;
   final Color? gradientStartColor;
   final Color? gradientEndColor;
   final double? width;
@@ -17,6 +18,7 @@ class StatCard extends StatelessWidget {
     Key? key,
     required this.label,
     required this.value,
+    this.icon,
     this.gradientStartColor = const Color(0xFF6B8DB8),
     this.gradientEndColor = const Color(0xFF6BC5F8),
     this.width,
@@ -62,6 +64,11 @@ class StatCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Icon (if provided) above the value
+          if (icon != null) ...[
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(height: 4),
+          ],
           // Large, bold value (e.g., '75%')
           Text(
             value, 

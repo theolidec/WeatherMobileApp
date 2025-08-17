@@ -33,16 +33,7 @@ class WeatherService {
       final double lon = longitude ?? _defaultLongitude;
       
       // Construct the URL with all parameters
-      final uri = Uri.parse(_baseUrl).replace(
-        queryParameters: {
-          'latitude': lat.toString(),
-          'longitude': lon.toString(),
-          'current_weather': 'true',
-          'hourly': 'temperature_2m,apparent_temperature,precipitation,rain,showers,snowfall,weathercode,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m,relativehumidity_2m',
-          'timezone': 'auto',
-          'forecast_days': '2',
-        },
-      );
+      final uri = Uri.parse('$_baseUrl?latitude=$lat&longitude=$lon&current_weather=true&hourly=temperature_2m,apparent_temperature,precipitation,rain,showers,snowfall,weathercode,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m,relativehumidity_2m,uv_index&timezone=auto&forecast_days=2');
       
       debugPrint('Fetching weather from: ${uri.toString()}');
       
@@ -85,7 +76,14 @@ class WeatherService {
         }
         
         // Create weather model from the current hour's data
-        final weather = WeatherModel.fromJson(hourly, timeIndex);
+        final currentData = data['current_weather'];
+        final index = 0; // Since we're only getting current weather, index is 0
+        
+        // Get UV index from hourly data (it's not in current_weather)
+        final hourlyUvIndex = (hourly['uv_index'] as List<dynamic>?)?[timeIndex] as num?;
+        final uvIndex = hourlyUvIndex?.round() ?? 0;
+        
+        final weather = WeatherModel.fromJson(hourly, timeIndex, uvIndex: uvIndex);
         
         // Set the location name if provided or available from the API
         if (locationName != null) {

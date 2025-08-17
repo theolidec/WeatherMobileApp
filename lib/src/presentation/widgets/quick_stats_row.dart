@@ -5,7 +5,7 @@ import 'stat_card.dart';
 
 /// A horizontal row of weather statistics (rain chance, wind speed, humidity).
 class QuickStatsRow extends StatelessWidget {
-  final String rainChance;
+  final int uvIndex;
   final double windSpeed;
   final String humidity;
   final Color? gradientStartColor;
@@ -15,9 +15,9 @@ class QuickStatsRow extends StatelessWidget {
 
   const QuickStatsRow({
     Key? key,
-    this.rainChance = '75%',
-    this.windSpeed = 12.0,
-    this.humidity = '68%',
+    required this.uvIndex,
+    required this.windSpeed,
+    required this.humidity,
     this.gradientStartColor,
     this.gradientEndColor,
     this.cardBorderRadius = 18,
@@ -30,11 +30,12 @@ class QuickStatsRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Rain chance stat card
+        // UV index stat card
         Expanded(
           child: StatCard(
-            label: 'Rain Chance',
-            value: rainChance,
+            label: 'UV Index',
+            value: '$uvIndex of 11',
+            icon: Icons.light_mode_outlined,
             gradientStartColor: gradientStartColor,
             gradientEndColor: gradientEndColor,
             borderRadius: cardBorderRadius,
@@ -46,8 +47,9 @@ class QuickStatsRow extends StatelessWidget {
         // Wind speed stat card
         Expanded(
           child: StatCard(
-            label: 'Wind Speed',
+            label: 'Wind',
             value: settings.formatSpeed(windSpeed),
+            icon: Icons.air_outlined,
             gradientStartColor: gradientStartColor,
             gradientEndColor: gradientEndColor,
             borderRadius: cardBorderRadius,
@@ -61,6 +63,7 @@ class QuickStatsRow extends StatelessWidget {
           child: StatCard(
             label: 'Humidity',
             value: humidity,
+            icon: Icons.water_drop_outlined,
             gradientStartColor: gradientStartColor,
             gradientEndColor: gradientEndColor,
             borderRadius: cardBorderRadius,

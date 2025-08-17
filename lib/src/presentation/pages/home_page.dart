@@ -254,9 +254,9 @@ class _HomePageState extends State<HomePage> {
                         icon: _getWeatherIcon(weather.weatherCode),
                       ),
                       const SizedBox(height: 16),
-                      // Quick Stats Row
+                      // Quick stats row (UV index, wind, humidity)
                       QuickStatsRow(
-                        rainChance: '${weather.precipitation.toStringAsFixed(0)}%',
+                        uvIndex: weather.uvIndex,
                         windSpeed: weather.windSpeed,
                         humidity: '${weather.relativeHumidity}%',
                         cardBorderRadius: 14,
