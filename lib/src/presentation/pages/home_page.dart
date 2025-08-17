@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -6,6 +7,7 @@ import '../../data/models/location_result.dart';
 import '../../data/services/location_history_service.dart';
 import '../../data/services/location_service.dart';
 import '../providers/weather_provider.dart';
+import '../../data/providers/settings_provider.dart';
 import '../widgets/weather_card.dart';
 import '../widgets/quick_stats_row.dart';
 import '../widgets/location_search_dialog.dart';
@@ -19,6 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Timer? _autoRefreshTimer;
   String _version = '';
   final LocationHistoryService _locationHistoryService = LocationHistoryService();
   final LocationService _locationService = LocationService();
@@ -27,6 +30,23 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _initializeApp();
+    _setupAutoRefresh();
+  }
+
+  void _setupAutoRefresh() {
+    // Cancel any existing timer
+    _autoRefreshTimer?.cancel();
+    
+    // Get the current refresh interval from settings
+    final settings = context.read<SettingsProvider>();
+    final refreshDuration = Duration(minutes: settings.refreshIntervalMinutes);
+    
+    // Set up the new timer
+    _autoRefreshTimer = Timer.periodic(refreshDuration, (timer) {
+      if (mounted) {
+        _onRefresh();
+      }
+    });
   }
 
   Future<void> _initializeApp() async {
@@ -135,6 +155,19 @@ class _HomePageState extends State<HomePage> {
         _onRefresh();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This will be called when dependencies change, including when settings are updated
+    _setupAutoRefresh();
   }
 
   @override

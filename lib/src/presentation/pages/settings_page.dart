@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../theme/theme_provider.dart';
 import '../../data/providers/settings_provider.dart';
+import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -119,10 +120,33 @@ class SettingsPage extends StatelessWidget {
           
           const SizedBox(height: 16),
           _buildSectionHeader('Data'),
-          _buildListTile(
-            title: 'Refresh Interval',
-            subtitle: '15 minutes',
-            onTap: () {},
+          Consumer<SettingsProvider>(
+            builder: (context, settings, _) {
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+                child: ListTile(
+                  title: const Text('Refresh Interval'),
+                  trailing: DropdownButtonHideUnderline(
+                    child: DropdownButton<RefreshInterval>(
+                      value: settings.refreshInterval,
+                      isDense: true,
+                      underline: const SizedBox(),
+                      items: RefreshInterval.values.map((interval) {
+                        return DropdownMenuItem<RefreshInterval>(
+                          value: interval,
+                          child: Text(interval.displayName),
+                        );
+                      }).toList(),
+                      onChanged: (RefreshInterval? newValue) {
+                        if (newValue != null) {
+                          settings.setRefreshInterval(newValue);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           
           const SizedBox(height: 24),
