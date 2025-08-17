@@ -11,6 +11,7 @@ import '../../data/providers/settings_provider.dart';
 import '../widgets/weather_card.dart';
 import '../widgets/quick_stats_row.dart';
 import '../widgets/location_search_dialog.dart';
+import '../widgets/daily_forecast_widget.dart';
 import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -295,6 +296,9 @@ class _HomePageState extends State<HomePage> {
                         cardBorderRadius: 14,
                         spacing: 8,
                       ),
+                      const SizedBox(height: 16),
+                      // 7-Day Forecast
+                      const DailyForecastWidget(),
                     ],
                   )
                 else
