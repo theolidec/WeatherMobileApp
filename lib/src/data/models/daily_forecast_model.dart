@@ -5,23 +5,31 @@ part 'daily_forecast_model.g.dart';
 
 @JsonSerializable()
 class DailyForecastResponse {
+  @JsonKey(name: 'daily')
   final DailyForecastData daily;
+  @JsonKey(name: 'latitude')
   final double latitude;
+  @JsonKey(name: 'longitude')
   final double longitude;
-  final double generationtime_ms;
-  final int utc_offset_seconds;
+  @JsonKey(name: 'generationtime_ms')
+  final double generationTimeMs;
+  @JsonKey(name: 'utc_offset_seconds')
+  final int utcOffsetSeconds;
+  @JsonKey(name: 'timezone')
   final String timezone;
-  final String timezone_abbreviation;
+  @JsonKey(name: 'timezone_abbreviation')
+  final String timezoneAbbreviation;
+  @JsonKey(name: 'elevation')
   final double elevation;
 
   DailyForecastResponse({
     required this.daily,
     required this.latitude,
     required this.longitude,
-    required this.generationtime_ms,
-    required this.utc_offset_seconds,
+    required this.generationTimeMs,
+    required this.utcOffsetSeconds,
     required this.timezone,
-    required this.timezone_abbreviation,
+    required this.timezoneAbbreviation,
     required this.elevation,
   });
 
@@ -57,6 +65,10 @@ class DailyForecastData {
   final List<double>? windGustsMax;
   @JsonKey(name: 'winddirection_10m_dominant')
   final List<int>? windDirection;
+  @JsonKey(name: 'relativehumidity_2m_mean')
+  final List<double>? relativeHumidity;
+  @JsonKey(name: 'uv_index_max')
+  final List<double>? uvIndex;
 
   DailyForecastData({
     required this.time,
@@ -72,6 +84,8 @@ class DailyForecastData {
     required this.windSpeedMax,
     this.windGustsMax,
     this.windDirection,
+    this.relativeHumidity,
+    this.uvIndex,
   });
 
   factory DailyForecastData.fromJson(Map<String, dynamic> json) =>

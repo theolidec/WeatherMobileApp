@@ -21,46 +21,6 @@ class WeatherModel {
   String? get locationName => _locationName;
   set locationName(String? value) => _locationName = value;
 
-  WeatherModel copyWith({
-    double? latitude,
-    double? longitude,
-    double? temperature,
-    double? apparentTemperature,
-    double? precipitation,
-    double? rain,
-    double? showers,
-    double? snowfall,
-    int? weatherCode,
-    int? cloudCover,
-    double? windSpeed,
-    int? windDirection,
-    double? windGusts,
-    int? relativeHumidity,
-    int? uvIndex,
-    DateTime? time,
-    String? locationName,
-  }) {
-    return WeatherModel(
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      temperature: temperature ?? this.temperature,
-      apparentTemperature: apparentTemperature ?? this.apparentTemperature,
-      precipitation: precipitation ?? this.precipitation,
-      rain: rain ?? this.rain,
-      showers: showers ?? this.showers,
-      snowfall: snowfall ?? this.snowfall,
-      weatherCode: weatherCode ?? this.weatherCode,
-      cloudCover: cloudCover ?? this.cloudCover,
-      windSpeed: windSpeed ?? this.windSpeed,
-      windDirection: windDirection ?? this.windDirection,
-      windGusts: windGusts ?? this.windGusts,
-      relativeHumidity: relativeHumidity ?? this.relativeHumidity,
-      uvIndex: uvIndex ?? this.uvIndex,
-      time: time ?? this.time,
-      locationName: locationName ?? this.locationName,
-    );
-  }
-
   @override
   String toString() {
     return 'WeatherModel(' 
