@@ -176,7 +176,6 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
   Future<void> _selectLocation(LocationResult location) async {
     try {
       debugPrint('Selected location: ${location.displayName} (${location.latitude}, ${location.longitude})');
-      final weatherProvider = context.read<WeatherProvider>();
       
       // Show loading state
       setState(() => _isLoading = true);
@@ -184,19 +183,12 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
       // Save to recent locations
       await _historyService.addToHistory(location);
       
-      // Fetch weather for the selected location
-      await weatherProvider.fetchWeather(
-        latitude: location.latitude,
-        longitude: location.longitude,
-        locationName: location.getShortAddress(),
-      );
-      
-      debugPrint('Weather fetch completed for ${location.displayName}');
-      
-      // Close the dialog only after successful fetch
+      // Close the dialog first to show loading in the main screen
       if (mounted) {
         Navigator.of(context).pop(location);
       }
+      
+      // The parent widget will handle the weather update since we're passing the location back
     } catch (e, stackTrace) {
       debugPrint('Error selecting location: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -245,17 +237,11 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
               TextField(
                 controller: _searchController,
-                autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search for a location...',
+                  hintText: 'Search for a city or address',
                   prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear),
@@ -267,22 +253,16 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
                       : null,
                 ),
                 onChanged: _searchLocations,
+                autofocus: true,
               ),
               const SizedBox(height: 16),
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _buildResults(),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('CANCEL'),
-                  ),
-                ],
-              ),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                )
+              else
+                Expanded(child: _buildResults()),
             ],
           ),
         ),

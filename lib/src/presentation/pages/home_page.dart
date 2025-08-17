@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../data/models/location_result.dart';
 import '../../data/services/location_history_service.dart';
 import '../../data/services/location_service.dart';
-import '../providers/weather_provider.dart';
+import '../../data/providers/weather_provider.dart';
 import '../../data/providers/settings_provider.dart';
 import '../widgets/weather_card.dart';
 import '../widgets/quick_stats_row.dart';
@@ -145,9 +145,17 @@ class _HomePageState extends State<HomePage> {
 
   // Show location search dialog
   void _showLocationSearchDialog() {
+    // Get the current weather provider before showing the dialog
+    final weatherProvider = context.read<WeatherProvider>();
+    
     showDialog(
       context: context,
-      builder: (context) => const LocationSearchDialog(),
+      builder: (BuildContext dialogContext) {
+        return ChangeNotifierProvider<WeatherProvider>.value(
+          value: weatherProvider,
+          child: const LocationSearchDialog(),
+        );
+      },
     ).then((location) {
       // This will be called when the dialog is closed with a location
       if (location != null) {
