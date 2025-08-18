@@ -135,13 +135,64 @@ class DailyForecastWidget extends StatelessWidget {
   }
 
   IconData _getWeatherIcon(int weatherCode) {
-    // Simplified weather icon mapping
-    if (weatherCode < 1) return Icons.wb_sunny;
-    if (weatherCode < 3) return Icons.wb_cloudy;
-    if (weatherCode < 50) return Icons.foggy;
-    if (weatherCode < 70) return Icons.grain;
-    if (weatherCode < 80) return Icons.umbrella;
-    if (weatherCode < 90) return Icons.ac_unit;
-    return Icons.thunderstorm;
+    // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
+    switch (weatherCode) {
+      // Clear sky
+      case 0:
+        return Icons.wb_sunny;
+      
+      // Mainly clear, partly cloudy, and overcast
+      case 1: // Mainly clear
+      case 2: // Partly cloudy
+        return Icons.wb_cloudy;
+      case 3: // Overcast
+        return Icons.cloud;
+      
+      // Fog and depositing rime fog
+      case 45: // Fog
+      case 48: // Depositing rime fog
+        return Icons.foggy;
+      
+      // Drizzle: Light, moderate, and dense intensity
+      case 51: // Light drizzle
+      case 53: // Moderate drizzle
+      case 55: // Dense drizzle
+      case 56: // Light freezing drizzle
+      case 57: // Dense freezing drizzle
+        return Icons.grain;
+      
+      // Rain: Slight, moderate and heavy intensity
+      case 61: // Slight rain
+      case 63: // Moderate rain
+      case 65: // Heavy rain
+      case 80: // Slight rain showers
+      case 81: // Moderate rain showers
+      case 82: // Violent rain showers
+        return Icons.beach_access; // Umbrella with rain
+      
+      // Freezing rain
+      case 66: // Light freezing rain
+      case 67: // Heavy freezing rain
+        return Icons.ac_unit;
+      
+      // Snow fall: Slight, moderate, and heavy intensity
+      case 71: // Slight snow fall
+      case 73: // Moderate snow fall
+      case 75: // Heavy snow fall
+      case 77: // Snow grains
+      case 85: // Slight snow showers
+      case 86: // Heavy snow showers
+        return Icons.ac_unit;
+      
+      // Thunderstorm: Slight or moderate
+      case 95: // Thunderstorm: Slight or moderate
+      case 96: // Thunderstorm with slight hail
+      case 99: // Thunderstorm with heavy hail
+        return Icons.thunderstorm;
+      
+      // Default icon for any unhandled codes
+      default:
+        return Icons.wb_sunny;
+    }
   }
 }
