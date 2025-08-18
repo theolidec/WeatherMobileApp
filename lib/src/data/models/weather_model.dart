@@ -1,5 +1,53 @@
 import 'package:flutter/foundation.dart';
 
+class DailyForecast {
+  final DateTime date;
+  final double maxTemperature;
+  final double minTemperature;
+  final int weatherCode;
+  final double precipitationSum;
+  final double precipitationHours;
+  final double windSpeedMax;
+  final int windDirectionDominant;
+
+  const DailyForecast({
+    required this.date,
+    required this.maxTemperature,
+    required this.minTemperature,
+    required this.weatherCode,
+    required this.precipitationSum,
+    required this.precipitationHours,
+    required this.windSpeedMax,
+    required this.windDirectionDominant,
+  });
+
+  factory DailyForecast.fromJson(Map<String, dynamic> json, int index) {
+    return DailyForecast(
+      date: DateTime.parse(json['time'][index]),
+      maxTemperature: (json['temperature_2m_max'][index] as num).toDouble(),
+      minTemperature: (json['temperature_2m_min'][index] as num).toDouble(),
+      weatherCode: json['weathercode'][index] as int,
+      precipitationSum: (json['precipitation_sum'][index] as num).toDouble(),
+      precipitationHours: (json['precipitation_hours'][index] as num).toDouble(),
+      windSpeedMax: (json['windspeed_10m_max'][index] as num).toDouble(),
+      windDirectionDominant: json['winddirection_10m_dominant'][index] as int,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date.toIso8601String(),
+      'temperature_2m_max': maxTemperature,
+      'temperature_2m_min': minTemperature,
+      'weathercode': weatherCode,
+      'precipitation_sum': precipitationSum,
+      'precipitation_hours': precipitationHours,
+      'windspeed_10m_max': windSpeedMax,
+      'winddirection_10m_dominant': windDirectionDominant,
+    };
+  }
+}
+
 class WeatherModel {
   final double latitude;
   final double longitude;
@@ -17,6 +65,7 @@ class WeatherModel {
   final int relativeHumidity;
   final int uvIndex;
   final DateTime time;
+  final List<DailyForecast>? dailyForecast;
   String? _locationName;
   String? get locationName => _locationName;
   set locationName(String? value) => _locationName = value;
@@ -60,6 +109,7 @@ class WeatherModel {
       'relativeHumidity': relativeHumidity,
       'uvIndex': uvIndex,
       'time': time.toIso8601String(),
+      'dailyForecast': dailyForecast?.map((f) => f.toJson()).toList(),
       'locationName': locationName,
     };
   }
@@ -81,10 +131,33 @@ class WeatherModel {
     required this.relativeHumidity,
     required this.uvIndex,
     required this.time,
+    this.dailyForecast,
     String? locationName,
   }) : _locationName = locationName;
 
   factory WeatherModel.fromJson(Map<String, dynamic> json, int index, {int uvIndex = 0}) {
+    // Parse daily forecast if available
+    List<DailyForecast>? dailyForecast;
+    if (json['daily'] != null) {
+      debugPrint('Processing daily forecast data...');
+      dailyForecast = [];
+      final dailyData = json['daily'] as Map<String, dynamic>;
+      final daysCount = (dailyData['time'] as List).length;
+      debugPrint('Found $daysCount days of forecast data');
+      
+      for (int i = 0; i < daysCount; i++) {
+        try {
+          final forecast = DailyForecast.fromJson(dailyData, i);
+          dailyForecast!.add(forecast);
+          debugPrint('Added forecast for ${forecast.date}: ${forecast.minTemperature}°C - ${forecast.maxTemperature}°C');
+        } catch (e) {
+          debugPrint('Error parsing daily forecast at index $i: $e');
+        }
+      }
+      debugPrint('Successfully processed ${dailyForecast.length} daily forecasts');
+    } else {
+      debugPrint('No daily forecast data found in the response');
+    }
     // Default coordinates if not provided
     final double latitude = json['latitude']?.toDouble() ?? 0.0;
     final double longitude = json['longitude']?.toDouble() ?? 0.0;
@@ -104,8 +177,9 @@ class WeatherModel {
       windDirection: json['winddirection_10m'][index] as int,
       windGusts: (json['windgusts_10m'][index] as num).toDouble(),
       relativeHumidity: json['relativehumidity_2m'][index] as int,
-      uvIndex: uvIndex,
+uvIndex: uvIndex,
       time: DateTime.parse(json['time'][index]),
+      dailyForecast: dailyForecast,
     );
   }
 

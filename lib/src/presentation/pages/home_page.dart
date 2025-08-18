@@ -173,15 +173,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Use watch to listen to changes in the provider
+    final theme = Theme.of(context);
     final weatherProvider = context.watch<WeatherProvider>();
     final weather = weatherProvider.currentWeather;
+    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
     
     // Show loading indicator when initially loading weather data
     if (weatherProvider.isLoading && weather == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Fetching weather data...',
+                style: theme.textTheme.titleMedium,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -189,35 +200,58 @@ class _HomePageState extends State<HomePage> {
     // Show error message if there's an error and no cached data
     if (weatherProvider.error != null && weather == null) {
       return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Error: ${weatherProvider.error}',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
+        body: RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Unable to load weather data',
+                        style: theme.textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        weatherProvider.error!,
+                        style: theme.textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: _onRefresh,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadWeather,
-                child: const Text('Retry'),
-              ),
-            ],
+            ),
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _onRefresh,
-          color: Theme.of(context).colorScheme.primary,
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.primary,
+          backgroundColor: theme.colorScheme.surface,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
@@ -225,92 +259,137 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                // Location bar with refresh and settings buttons
-                Row(
-                  children: [
-                    // Location search button
-                    IconButton(
-                      icon: const Icon(Icons.location_on),
-                      onPressed: _showLocationSearchDialog,
-                      tooltip: 'Search location',
-                    ),
-
-                    const SizedBox(width: 1),
-                    
-                    // Location text with tap to search
-                    Expanded(
-                      child: InkWell(
-                        onTap: _showLocationSearchDialog,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              weather?.locationName ?? 'Current Location',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                  // Location bar
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: Row(
+                      children: [
+                        // Location icon with search functionality
+                        IconButton(
+                          icon: const Icon(Icons.location_on_outlined),
+                          onPressed: _showLocationSearchDialog,
+                          tooltip: 'Change location',
+                          style: IconButton.styleFrom(
+                            backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ],
-                        ),
-                      ),
-                    ), //
-                    // Settings button
-                    IconButton(
-                      icon: Icon(Icons.settings, 
-                        color: Theme.of(context).colorScheme.onBackground,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsPage(),
                           ),
-                        );
-                      },
-                      padding: const EdgeInsets.all(8),
-                      constraints: const BoxConstraints(),
+                        ),
+                        
+                        const SizedBox(width: 12),
+                        
+                        // Location name with tap to search
+                        Expanded(
+                          child: InkWell(
+                            onTap: _showLocationSearchDialog,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    weather?.locationName ?? 'Search for a location',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        // Settings button
+                        IconButton(
+                          icon: const Icon(Icons.settings_outlined),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SettingsPage()),
+                          ),
+                          tooltip: 'Settings',
+                          style: IconButton.styleFrom(
+                            backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Weather Card
-                if (weather != null)
-                  Column(
-                    children: [
-                      WeatherCard(
-                        temperature: weather.temperature,
-                        condition: weather.condition,
-                        lastUpdated: 'Updated: ${_formatTime(weather.time)}',
-                        icon: _getWeatherIcon(weather.weatherCode),
-                      ),
-                      const SizedBox(height: 16),
-                      // Quick stats row (UV index, wind, humidity)
-                      QuickStatsRow(
-                        uvIndex: weather.uvIndex,
-                        windSpeed: weather.windSpeed,
-                        humidity: '${weather.relativeHumidity}%',
-                        cardBorderRadius: 14,
-                        spacing: 8,
-                      ),
-                      const SizedBox(height: 16),
-                      // 7-Day Forecast
-                      const DailyForecastWidget(),
-                    ],
-                  )
-                else
-                  const Center(child: Text('No weather data available')),
-                  
-                // Show loading indicator at the bottom when refreshing
-                if (weatherProvider.isLoading && weather != null)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: CircularProgressIndicator(),
                   ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 4),
+
+                // Main weather content
+                if (weather != null) ...[
+                  // Current weather card
+                  WeatherCard(
+                    temperature: weather.temperature,
+                    condition: weather.condition,
+                    lastUpdated: 'Updated: ${_formatTime(weather.time)}',
+                    icon: _getWeatherIcon(weather.weatherCode),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Quick stats row (UV index, wind, humidity)
+                  QuickStatsRow(
+                    uvIndex: weather.uvIndex,
+                    windSpeed: weather.windSpeed,
+                    humidity: '${weather.relativeHumidity}%',
+                    cardBorderRadius: 16,
+                    spacing: 8,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Daily forecast section
+                  if (weather.dailyForecast != null && weather.dailyForecast!.isNotEmpty)
+                    DailyForecastWidget(forecastDays: weather.dailyForecast!),
+                    
+                  // Show loading indicator at the bottom when refreshing
+                  if (weatherProvider.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ] else ...[
+                  // No weather data available state
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud_off_outlined,
+                            size: 64,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No weather data available',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          FilledButton.icon(
+                            onPressed: _onRefresh,
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: const Text('Refresh'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                
+                const SizedBox(height: 24),
                 // API attribution and version text at the bottom
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),

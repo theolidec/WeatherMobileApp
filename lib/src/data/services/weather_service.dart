@@ -32,8 +32,17 @@ class WeatherService {
       final double lat = latitude ?? _defaultLatitude;
       final double lon = longitude ?? _defaultLongitude;
       
-      // Construct the URL with all parameters
-      final uri = Uri.parse('$_baseUrl?latitude=$lat&longitude=$lon&current_weather=true&hourly=temperature_2m,apparent_temperature,precipitation,rain,showers,snowfall,weathercode,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m,relativehumidity_2m,uv_index&timezone=auto&forecast_days=2');
+      // Construct the URL with all parameters including daily forecast
+      final uri = Uri.parse(
+        '$_baseUrl?'
+        'latitude=$lat&'
+        'longitude=$lon&'
+        'current_weather=true&'
+        'hourly=temperature_2m,apparent_temperature,precipitation,rain,showers,snowfall,weathercode,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m,relativehumidity_2m,uv_index&'
+        'daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_hours,windspeed_10m_max,winddirection_10m_dominant&'
+        'timezone=auto&'
+        'forecast_days=7'  // Get 7-day forecast
+      );
       
       debugPrint('Fetching weather from: ${uri.toString()}');
       
@@ -83,7 +92,13 @@ class WeatherService {
         final hourlyUvIndex = (hourly['uv_index'] as List<dynamic>?)?[timeIndex] as num?;
         final uvIndex = hourlyUvIndex?.round() ?? 0;
         
-        final weather = WeatherModel.fromJson(hourly, timeIndex, uvIndex: uvIndex);
+        // Combine hourly and daily data for the model
+        final weatherData = Map<String, dynamic>.from(hourly);
+        if (data['daily'] != null) {
+          weatherData['daily'] = data['daily'];
+        }
+        
+        final weather = WeatherModel.fromJson(weatherData, timeIndex, uvIndex: uvIndex);
         
         // Set the location name if provided or available from the API
         if (locationName != null) {

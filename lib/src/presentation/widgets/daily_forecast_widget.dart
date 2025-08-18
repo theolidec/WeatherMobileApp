@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../data/mock/mock_weather_data.dart';
 import '../../data/models/weather_model.dart';
 import '../../data/providers/settings_provider.dart';
 
 class DailyForecastWidget extends StatelessWidget {
-  final List<WeatherModel>? forecastDays;
+  final List<DailyForecast>? forecastDays;
   
   const DailyForecastWidget({
     Key? key,
@@ -16,6 +15,13 @@ class DailyForecastWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<SettingsProvider>(context);
+    
+    // Debug information
+    debugPrint('DailyForecastWidget - Building with ${forecastDays?.length ?? 0} forecast days');
+    if (forecastDays != null && forecastDays!.isNotEmpty) {
+      debugPrint('First forecast day: ${forecastDays!.first.date} - ${forecastDays!.first.weatherCode}');
+      debugPrint('Last forecast day: ${forecastDays!.last.date} - ${forecastDays!.last.weatherCode}');
+    }
     
     return Card(
       margin: const EdgeInsets.all(12.0),
@@ -41,15 +47,27 @@ class DailyForecastWidget extends StatelessWidget {
             const SizedBox(height: 8.0),
             SizedBox(
               height: 140,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                scrollDirection: Axis.horizontal,
-                itemCount: (forecastDays ?? MockWeatherData.generateDailyForecast()).length,
-                itemBuilder: (context, index) {
-                  final day = (forecastDays ?? MockWeatherData.generateDailyForecast())[index];
-                  return _buildForecastItem(context, day, settings);
-                },
-              ),
+              child: forecastDays == null || forecastDays!.isEmpty
+                  ? const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.calendar_today, size: 32, color: Colors.grey),
+                          SizedBox(height: 8),
+                          Text('No forecast data available', 
+                              style: TextStyle(fontSize: 14, color: Colors.grey)),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: forecastDays!.length,
+                      itemBuilder: (context, index) {
+                        final day = forecastDays![index];
+                        return _buildForecastItem(context, day, settings);
+                      },
+                    ),
             ),
           ],
         ),
@@ -57,10 +75,14 @@ class DailyForecastWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildForecastItem(BuildContext context, WeatherModel day, SettingsProvider settings) {
-    final date = day.time;
-    final dayName = DateFormat('E').format(date);
-    final isToday = date.day == DateTime.now().day;
+  Widget _buildForecastItem(BuildContext context, DailyForecast day, SettingsProvider settings) {
+    final dayName = DateFormat('E').format(day.date);
+    final isToday = day.date.day == DateTime.now().day;
+    
+    String formatTemp(double? temp) {
+      if (temp == null) return '--';
+      return '${_formatTemperature(temp, settings.temperatureUnit)}°';
+    }
     
     return Container(
       width: 80,
@@ -78,18 +100,26 @@ class DailyForecastWidget extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 4.0),
-          // Weather icon would go here
-          Icon(
-            _getWeatherIcon(day.weatherCode),
-            size: 28,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          day.weatherCode != null 
+              ? Icon(
+                  _getWeatherIcon(day.weatherCode!), 
+                  size: 28,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : const Text('--', style: TextStyle(fontSize: 16)),
           const SizedBox(height: 4.0),
           Text(
-            '${_formatTemperature(day.temperature, settings.temperatureUnit)}°',
+            formatTemp(day.maxTemperature),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            formatTemp(day.minTemperature),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
             ),
           ),
         ],

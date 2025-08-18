@@ -45,33 +45,27 @@ DailyForecastData _$DailyForecastDataFromJson(
   temperatureMin: (json['temperature_2m_min'] as List<dynamic>)
       .map((e) => (e as num).toDouble())
       .toList(),
-  apparentTemperatureMax: (json['apparent_temperature_max'] as List<dynamic>?)
-      ?.map((e) => (e as num).toDouble())
+  apparentTemperatureMax: (json['apparent_temperature_max'] as List<dynamic>)
+      .map((e) => (e as num).toDouble())
       .toList(),
-  apparentTemperatureMin:
-      (json['apparent_temperature_min'] as List<dynamic>?)
-          ?.map((e) => (e as num).toDouble())
-          .toList() ??
-      [],
-  sunriseTime:
-      (json['sunrise'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      [],
-  sunsetTime:
-      (json['sunset'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      [],
-  precipitationSum:
-      (json['precipitation_sum'] as List<dynamic>?)
-          ?.map((e) => (e as num).toDouble())
-          .toList() ??
-      [],
+  apparentTemperatureMin: (json['apparent_temperature_min'] as List<dynamic>)
+      .map((e) => (e as num).toDouble())
+      .toList(),
+  sunriseTime: (json['sunrise'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+  sunsetTime: (json['sunset'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+  precipitationSum: (json['precipitation_sum'] as List<dynamic>)
+      .map((e) => (e as num).toDouble())
+      .toList(),
   precipitationHours: (json['precipitation_hours'] as List<dynamic>?)
       ?.map((e) => (e as num).toDouble())
       .toList(),
-  windSpeedMax:
-      (json['windspeed_10m_max'] as List<dynamic>?)
-          ?.map((e) => (e as num).toDouble())
-          .toList() ??
-      [],
+  windSpeedMax: (json['windspeed_10m_max'] as List<dynamic>)
+      .map((e) => (e as num).toDouble())
+      .toList(),
   windGustsMax: (json['windgusts_10m_max'] as List<dynamic>?)
       ?.map((e) => (e as num).toDouble())
       .toList(),
