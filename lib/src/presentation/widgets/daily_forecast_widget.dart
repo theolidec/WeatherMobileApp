@@ -24,7 +24,7 @@ class DailyForecastWidget extends StatelessWidget {
     }
     
     return Card(
-      margin: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
       elevation: 4.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
@@ -85,26 +85,40 @@ class DailyForecastWidget extends StatelessWidget {
     }
     
     return Container(
-      width: 80,
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      padding: const EdgeInsets.all(8.0),
+      width: 85,  // Reduced width for a more compact look
+      margin: const EdgeInsets.symmetric(horizontal: 2.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4A6FA5), Color(0xFF6BC5F8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text(
             isToday ? 'Today' : dayName,
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 4.0),
           day.weatherCode != null 
               ? Icon(
                   _getWeatherIcon(day.weatherCode!), 
                   size: 28,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Colors.white,
                 )
               : const Text('--', style: TextStyle(fontSize: 16)),
           const SizedBox(height: 4.0),
@@ -113,13 +127,14 @@ class DailyForecastWidget extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
           Text(
             formatTemp(day.minTemperature),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
-              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+              color: Colors.white70,
             ),
           ),
         ],
