@@ -345,7 +345,7 @@ class _HomePageState extends State<HomePage> {
                     spacing: 8,
                   ),
                   
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 5),
                   
                   // Daily forecast section
                   if (weather.dailyForecast != null && weather.dailyForecast!.isNotEmpty)
@@ -354,7 +354,7 @@ class _HomePageState extends State<HomePage> {
                   // Show loading indicator at the bottom when refreshing
                   if (weatherProvider.isLoading)
                     const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                      padding: EdgeInsets.symmetric(vertical: 20.0),
                       child: Center(child: CircularProgressIndicator()),
                     ),
                 ] else ...[

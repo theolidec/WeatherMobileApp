@@ -4,6 +4,13 @@ import 'package:provider/provider.dart';
 import '../../data/models/weather_model.dart';
 import '../../data/providers/settings_provider.dart';
 
+class _WeatherIconInfo {
+  final IconData icon;
+  final String description;
+
+  const _WeatherIconInfo(this.icon, this.description);
+}
+
 class DailyForecastWidget extends StatelessWidget {
   final List<DailyForecast>? forecastDays;
   
@@ -34,14 +41,27 @@ class DailyForecastWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                '7-Day Forecast',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '7-Day Forecast',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.info_outline, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      _showWeatherIconsInfo(context);
+                    },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 8.0),
@@ -149,6 +169,50 @@ class DailyForecastWidget extends StatelessWidget {
     return value.toStringAsFixed(0);
   }
 
+  void _showWeatherIconsInfo(BuildContext context) {
+    final weatherIcons = [
+      _WeatherIconInfo(Icons.wb_sunny, 'Clear sky'),
+      _WeatherIconInfo(Icons.cloud_queue, 'Partly cloudy'),
+      _WeatherIconInfo(Icons.cloud, 'Overcast'),
+      _WeatherIconInfo(Icons.foggy, 'Fog or rime fog'),
+      _WeatherIconInfo(Icons.grain, 'Drizzle/Freezing drizzle'),
+      _WeatherIconInfo(Icons.water_drop, 'Rain/Showers'),
+      _WeatherIconInfo(Icons.ac_unit, 'Freezing rain/Snow'),
+      _WeatherIconInfo(Icons.thunderstorm, 'Thunderstorm'),
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Weather Icons Guide'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...weatherIcons.map((info) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(info.icon, size: 32, color: Colors.blue),
+                    const SizedBox(width: 16),
+                    Expanded(child: Text(info.description)),
+                  ],
+                ),
+              )).toList(),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Got it!'),
+          ),
+        ],
+      ),
+    );
+  }
+
   IconData _getWeatherIcon(int weatherCode) {
     // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
     switch (weatherCode) {
@@ -159,7 +223,7 @@ class DailyForecastWidget extends StatelessWidget {
       // Mainly clear, partly cloudy, and overcast
       case 1: // Mainly clear
       case 2: // Partly cloudy
-        return Icons.wb_cloudy;
+        return Icons.cloud_queue;
       case 3: // Overcast
         return Icons.cloud;
       
@@ -183,7 +247,7 @@ class DailyForecastWidget extends StatelessWidget {
       case 80: // Slight rain showers
       case 81: // Moderate rain showers
       case 82: // Violent rain showers
-        return Icons.beach_access; // Umbrella with rain
+        return Icons.water_drop; // Umbrella with rain
       
       // Freezing rain
       case 66: // Light freezing rain
