@@ -126,12 +126,23 @@ class DailyForecastWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
-            isToday ? 'Today' : dayName,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-            ),
+          Column(
+            children: [
+              Text(
+                isToday ? 'Today' : dayName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                DateFormat('d MMM').format(day.date),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4.0),
           day.weatherCode != null 

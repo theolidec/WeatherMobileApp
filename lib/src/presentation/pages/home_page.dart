@@ -277,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         
-                        const SizedBox(width: 12),
+                        // const SizedBox(width: 5),
                         
                         // Location name with tap to search
                         Expanded(
@@ -294,6 +294,7 @@ class _HomePageState extends State<HomePage> {
                                     weather?.locationName ?? 'Search for a location',
                                     style: theme.textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
+                                      fontSize: 21, // Increased from default 16
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
