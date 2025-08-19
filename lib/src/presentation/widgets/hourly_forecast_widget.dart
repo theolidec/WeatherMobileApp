@@ -29,7 +29,7 @@ class HourlyForecastWidget extends StatelessWidget {
       debugPrint('No hourly forecasts available to display');
     }
     
-    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final settings = Provider.of<SettingsProvider>(context);
     
     return Container(
       decoration: BoxDecoration(
@@ -171,7 +171,7 @@ class HourlyForecastWidget extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 2),
                                         Text(
-                                          '${forecast.precipitation.round()}%',
+                                          settings.formatPrecipitation(forecast.precipitation),
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 10,

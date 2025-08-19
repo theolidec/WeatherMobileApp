@@ -7,7 +7,7 @@ class AppTheme {
       colorScheme: ColorScheme.light(
         primary: Colors.blue.shade700,
         secondary: Colors.blue.shade500,
-        surface: Colors.lightBlue.shade50,
+        surface: Colors.lightBlue.shade100,
         background: Colors.lightBlue.shade100,
         onPrimary: Colors.white,
         onSecondary: Colors.white,

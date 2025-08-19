@@ -213,7 +213,7 @@ class DailyForecastWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: 2),
                   Text(
-                    '${day.precipitationSum.toStringAsFixed(1)}mm',
+                    settings.formatPrecipitation(day.precipitationSum),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,

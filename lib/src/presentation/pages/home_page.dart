@@ -381,7 +381,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 5),
                 // API attribution and version text at the bottom
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),

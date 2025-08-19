@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum TemperatureUnit { celsius, fahrenheit }
 enum SpeedUnit { kmh, mph, ms }
 
+enum PrecipitationUnit { mm, inches }
+
 enum RefreshInterval {
   fiveMinutes(5, '5 minutes'),
   fifteenMinutes(15, '15 minutes'),
@@ -27,15 +29,18 @@ enum RefreshInterval {
 class SettingsProvider extends ChangeNotifier {
   static const String _tempUnitKey = 'temperature_unit';
   static const String _speedUnitKey = 'speed_unit';
+  static const String _precipitationUnitKey = 'precipitation_unit';
   static const String _refreshIntervalKey = 'refresh_interval';
   static const int _defaultRefreshInterval = 15; // minutes
   
   TemperatureUnit _temperatureUnit = TemperatureUnit.celsius;
   SpeedUnit _speedUnit = SpeedUnit.kmh;
+  PrecipitationUnit _precipitationUnit = PrecipitationUnit.mm;
   int _refreshInterval = _defaultRefreshInterval;
 
   TemperatureUnit get temperatureUnit => _temperatureUnit;
   SpeedUnit get speedUnit => _speedUnit;
+  PrecipitationUnit get precipitationUnit => _precipitationUnit;
   int get refreshIntervalMinutes => _refreshInterval;
   RefreshInterval get refreshInterval => RefreshInterval.fromMinutes(_refreshInterval);
 
@@ -43,6 +48,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get isKmh => _speedUnit == SpeedUnit.kmh;
   bool get isMph => _speedUnit == SpeedUnit.mph;
   bool get isMs => _speedUnit == SpeedUnit.ms;
+  bool get isMm => _precipitationUnit == PrecipitationUnit.mm;
 
   SettingsProvider() {
     _loadSettings();
@@ -55,6 +61,9 @@ class SettingsProvider extends ChangeNotifier {
     ];
     _speedUnit = SpeedUnit.values[
       prefs.getInt(_speedUnitKey) ?? SpeedUnit.kmh.index
+    ];
+    _precipitationUnit = PrecipitationUnit.values[
+      prefs.getInt(_precipitationUnitKey) ?? PrecipitationUnit.mm.index
     ];
     _refreshInterval = prefs.getInt(_refreshIntervalKey) ?? _defaultRefreshInterval;
     notifyListeners();
@@ -95,6 +104,22 @@ class SettingsProvider extends ChangeNotifier {
       default:
         return '${speedKmh.toStringAsFixed(1)} km/h';
     }
+  }
+  
+  String formatPrecipitation(double mm) {
+    if (_precipitationUnit == PrecipitationUnit.inches) {
+      return '${(mm * 0.0393701).toStringAsFixed(2)} in';
+    }
+    return '${mm.toStringAsFixed(1)} mm';
+  }
+  
+  Future<void> setPrecipitationUnit(PrecipitationUnit unit) async {
+    if (_precipitationUnit == unit) return;
+    
+    _precipitationUnit = unit;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_precipitationUnitKey, unit.index);
+    notifyListeners();
   }
   
   Future<void> setRefreshInterval(RefreshInterval interval) async {

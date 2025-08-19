@@ -40,6 +40,25 @@ class SettingsPage extends StatelessWidget {
           ),
           Consumer<SettingsProvider>(
             builder: (context, settings, _) {
+              return _buildUnitSelectionTile(
+                context: context,
+                title: 'Precipitation Unit',
+                currentValue: settings.precipitationUnit == PrecipitationUnit.mm 
+                    ? 'Millimeters (mm)' 
+                    : 'Inches (in)',
+                options: const ['Millimeters (mm)', 'Inches (in)'],
+                onSelected: (value) {
+                  settings.setPrecipitationUnit(
+                    value == 'Millimeters (mm)' 
+                        ? PrecipitationUnit.mm 
+                        : PrecipitationUnit.inches,
+                  );
+                },
+              );
+            },
+          ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, _) {
               String getSpeedUnitText() {
                 switch (settings.speedUnit) {
                   case SpeedUnit.kmh:
@@ -122,29 +141,17 @@ class SettingsPage extends StatelessWidget {
           _buildSectionHeader('Data'),
           Consumer<SettingsProvider>(
             builder: (context, settings, _) {
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-                child: ListTile(
-                  title: const Text('Refresh Interval'),
-                  trailing: DropdownButtonHideUnderline(
-                    child: DropdownButton<RefreshInterval>(
-                      value: settings.refreshInterval,
-                      isDense: true,
-                      underline: const SizedBox(),
-                      items: RefreshInterval.values.map((interval) {
-                        return DropdownMenuItem<RefreshInterval>(
-                          value: interval,
-                          child: Text(interval.displayName),
-                        );
-                      }).toList(),
-                      onChanged: (RefreshInterval? newValue) {
-                        if (newValue != null) {
-                          settings.setRefreshInterval(newValue);
-                        }
-                      },
-                    ),
-                  ),
-                ),
+              return _buildRefreshIntervalTile(
+                context: context,
+                currentValue: settings.refreshInterval.displayName,
+                options: RefreshInterval.values.map((e) => e.displayName).toList(),
+                onSelected: (value) {
+                  final selectedInterval = RefreshInterval.values.firstWhere(
+                    (interval) => interval.displayName == value,
+                    orElse: () => RefreshInterval.fifteenMinutes,
+                  );
+                  settings.setRefreshInterval(selectedInterval);
+                },
               );
             },
           ),
@@ -180,20 +187,83 @@ class SettingsPage extends StatelessWidget {
   }) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-      child: ListTile(
-        title: Text(title),
-        subtitle: Text(currentValue),
-        trailing: PopupMenuButton<String>(
-          icon: const Icon(Icons.arrow_drop_down),
-          onSelected: onSelected,
-          itemBuilder: (BuildContext context) {
-            return options.map<PopupMenuItem<String>>((String value) {
+      child: GestureDetector(
+        onTap: () {
+          // Show the menu when the row is tapped
+          final RenderBox button = context.findRenderObject() as RenderBox;
+          final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+          final RelativeRect position = RelativeRect.fromRect(
+            Rect.fromPoints(
+              button.localToGlobal(Offset.zero, ancestor: overlay),
+              button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+            ),
+            Offset.zero & overlay.size,
+          );
+          
+          showMenu<String>(
+            context: context,
+            position: position,
+            items: options.map<PopupMenuItem<String>>((String value) {
               return PopupMenuItem<String>(
                 value: value,
                 child: Text(value),
               );
-            }).toList();
-          },
+            }).toList(),
+          ).then((value) {
+            if (value != null) {
+              onSelected(value);
+            }
+          });
+        },
+        child: ListTile(
+          title: Text(title),
+          subtitle: Text(currentValue),
+          trailing: const Icon(Icons.arrow_drop_down),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildRefreshIntervalTile({
+    required BuildContext context,
+    required String currentValue,
+    required List<String> options,
+    required ValueChanged<String> onSelected,
+  }) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+      child: GestureDetector(
+        onTap: () {
+          // Show the menu when the row is tapped
+          final RenderBox button = context.findRenderObject() as RenderBox;
+          final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+          final RelativeRect position = RelativeRect.fromRect(
+            Rect.fromPoints(
+              button.localToGlobal(Offset.zero, ancestor: overlay),
+              button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+            ),
+            Offset.zero & overlay.size,
+          );
+          
+          showMenu<String>(
+            context: context,
+            position: position,
+            items: options.map<PopupMenuItem<String>>((String value) {
+              return PopupMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ).then((value) {
+            if (value != null) {
+              onSelected(value);
+            }
+          });
+        },
+        child: ListTile(
+          title: const Text('Refresh Interval'),
+          subtitle: Text(currentValue),
+          trailing: const Icon(Icons.arrow_drop_down),
         ),
       ),
     );
