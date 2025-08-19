@@ -12,6 +12,7 @@ import '../widgets/weather_card.dart';
 import '../widgets/quick_stats_row.dart';
 import '../widgets/location_search_dialog.dart';
 import '../widgets/daily_forecast_widget.dart';
+import '../widgets/hourly_forecast_widget.dart';
 import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -348,6 +349,12 @@ class _HomePageState extends State<HomePage> {
                   
                   const SizedBox(height: 5),
                   
+                  // Hourly forecast section
+                  if (weather.hourlyForecast?.isNotEmpty ?? false) ...[
+                    HourlyForecastWidget(hourlyForecasts: weather.hourlyForecast!),
+                    const SizedBox(height: 20),
+                  ],
+                  
                   // Daily forecast section
                   if (weather.dailyForecast != null && weather.dailyForecast!.isNotEmpty)
                     DailyForecastWidget(forecastDays: weather.dailyForecast!),
@@ -359,6 +366,7 @@ class _HomePageState extends State<HomePage> {
                       child: Center(child: CircularProgressIndicator()),
                     ),
                 ] else ...[
+                  // No weather data available state
                   // No weather data available state
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5,

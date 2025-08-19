@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'hourly_forecast_model.dart';
 
 class DailyForecast {
   final DateTime date;
@@ -66,6 +67,7 @@ class WeatherModel {
   final int uvIndex;
   final DateTime time;
   final List<DailyForecast>? dailyForecast;
+  final List<HourlyForecast>? hourlyForecast;
   String? _locationName;
   String? get locationName => _locationName;
   set locationName(String? value) => _locationName = value;
@@ -132,54 +134,88 @@ class WeatherModel {
     required this.uvIndex,
     required this.time,
     this.dailyForecast,
+    this.hourlyForecast,
     String? locationName,
   }) : _locationName = locationName;
 
-  factory WeatherModel.fromJson(Map<String, dynamic> json, int index, {int uvIndex = 0}) {
+  factory WeatherModel.fromJson(Map<String, dynamic> json, int index, {int uvIndex = 0, List<HourlyForecast>? hourlyForecast}) {
+    debugPrint('Parsing WeatherModel from JSON...');
+    
+    // Handle current weather data
+    final currentWeather = json['current_weather'] as Map<String, dynamic>? ?? {};
+    final hourly = json['hourly'] as Map<String, dynamic>? ?? {};
+    
     // Parse daily forecast if available
     List<DailyForecast>? dailyForecast;
     if (json['daily'] != null) {
-      debugPrint('Processing daily forecast data...');
-      dailyForecast = [];
-      final dailyData = json['daily'] as Map<String, dynamic>;
-      final daysCount = (dailyData['time'] as List).length;
-      debugPrint('Found $daysCount days of forecast data');
-      
-      for (int i = 0; i < daysCount; i++) {
-        try {
-          final forecast = DailyForecast.fromJson(dailyData, i);
-          dailyForecast!.add(forecast);
-          debugPrint('Added forecast for ${forecast.date}: ${forecast.minTemperature}°C - ${forecast.maxTemperature}°C');
-        } catch (e) {
-          debugPrint('Error parsing daily forecast at index $i: $e');
+      try {
+        debugPrint('Processing daily forecast data...');
+        dailyForecast = [];
+        final dailyData = json['daily'] as Map<String, dynamic>;
+        final daysCount = (dailyData['time'] as List?)?.length ?? 0;
+        debugPrint('Found $daysCount days of forecast data');
+        
+        for (int i = 0; i < daysCount; i++) {
+          try {
+            final forecast = DailyForecast.fromJson(dailyData, i);
+            dailyForecast!.add(forecast);
+            debugPrint('Added forecast for ${forecast.date}: ${forecast.minTemperature}°C - ${forecast.maxTemperature}°C');
+          } catch (e) {
+            debugPrint('Error parsing daily forecast at index $i: $e');
+          }
         }
+        debugPrint('Successfully processed ${dailyForecast?.length ?? 0} daily forecasts');
+      } catch (e) {
+        debugPrint('Error processing daily forecast: $e');
       }
-      debugPrint('Successfully processed ${dailyForecast.length} daily forecasts');
     } else {
       debugPrint('No daily forecast data found in the response');
     }
+    
+    // Get current time from current_weather or use the first hourly time
+    final currentTime = currentWeather['time'] != null 
+        ? DateTime.parse(currentWeather['time']) 
+        : DateTime.now();
+    
     // Default coordinates if not provided
-    final double latitude = json['latitude']?.toDouble() ?? 0.0;
-    final double longitude = json['longitude']?.toDouble() ?? 0.0;
+    final double latitude = (json['latitude'] as num?)?.toDouble() ?? 0.0;
+    final double longitude = (json['longitude'] as num?)?.toDouble() ?? 0.0;
+    
+    // Get current weather values from current_weather or hourly data
+    final temperature = currentWeather['temperature']?.toDouble() ?? 
+        (hourly['temperature_2m']?[0] as num?)?.toDouble() ?? 0.0;
+        
+    final weatherCode = currentWeather['weathercode'] as int? ?? 
+        (hourly['weathercode']?[0] as int?) ?? 0;
+        
+    final windSpeed = currentWeather['windspeed']?.toDouble() ?? 
+        (hourly['windspeed_10m']?[0] as num?)?.toDouble() ?? 0.0;
+        
+    final windDirection = currentWeather['winddirection'] as int? ?? 
+        (hourly['winddirection_10m']?[0] as int?) ?? 0;
+    
+    // Get other values from hourly data if available
+    final hourlyIndex = 0; // Use first hour if no specific index is better
     
     return WeatherModel(
       latitude: latitude,
       longitude: longitude,
-      temperature: (json['temperature_2m'][index] as num).toDouble(),
-      apparentTemperature: (json['apparent_temperature'][index] as num).toDouble(),
-      precipitation: (json['precipitation'][index] as num).toDouble(),
-      rain: (json['rain'][index] as num).toDouble(),
-      showers: (json['showers'][index] as num).toDouble(),
-      snowfall: (json['snowfall'][index] as num).toDouble(),
-      weatherCode: json['weathercode'][index] as int,
-      cloudCover: json['cloudcover'][index] as int,
-      windSpeed: (json['windspeed_10m'][index] as num).toDouble(),
-      windDirection: json['winddirection_10m'][index] as int,
-      windGusts: (json['windgusts_10m'][index] as num).toDouble(),
-      relativeHumidity: json['relativehumidity_2m'][index] as int,
-uvIndex: uvIndex,
-      time: DateTime.parse(json['time'][index]),
+      temperature: temperature,
+      apparentTemperature: (hourly['apparent_temperature']?[hourlyIndex] as num?)?.toDouble() ?? temperature,
+      precipitation: (hourly['precipitation']?[hourlyIndex] as num?)?.toDouble() ?? 0.0,
+      rain: (hourly['rain']?[hourlyIndex] as num?)?.toDouble() ?? 0.0,
+      showers: (hourly['showers']?[hourlyIndex] as num?)?.toDouble() ?? 0.0,
+      snowfall: (hourly['snowfall']?[hourlyIndex] as num?)?.toDouble() ?? 0.0,
+      weatherCode: weatherCode,
+      cloudCover: (hourly['cloudcover']?[hourlyIndex] as num?)?.toInt() ?? 0,
+      windSpeed: windSpeed,
+      windDirection: windDirection,
+      windGusts: (hourly['windgusts_10m']?[hourlyIndex] as num?)?.toDouble() ?? windSpeed,
+      relativeHumidity: (hourly['relativehumidity_2m']?[hourlyIndex] as num?)?.toInt() ?? 50,
+      uvIndex: uvIndex,
+      time: currentTime,
       dailyForecast: dailyForecast,
+      hourlyForecast: hourlyForecast,
     );
   }
 
