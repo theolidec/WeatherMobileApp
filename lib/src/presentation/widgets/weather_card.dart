@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/providers/settings_provider.dart';
 
-/// A large card displaying current weather conditions including temperature and weather state.
+/// A large card displaying current weather conditions including temperature, weather state,
+/// wind speed, and humidity.
 class WeatherCard extends StatelessWidget {
   final double temperature;
   final String condition;
   final String lastUpdated;
   final IconData icon;
+  final double windSpeed;
+  final String humidity;
 
   const WeatherCard({
     Key? key,
     required this.temperature,
     required this.condition,
     required this.lastUpdated,
+    required this.windSpeed,
+    required this.humidity,
     this.icon = Icons.cloud,
   }) : super(key: key);
 
@@ -90,6 +95,46 @@ class WeatherCard extends StatelessWidget {
                     color: Colors.white.withOpacity(0.8),
                     fontSize: 12,
                   ),
+                ),
+                
+                // Wind and humidity row
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Wind speed
+                    Row(
+                      children: [
+                        const Icon(Icons.air, color: Colors.white, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${settings.formatSpeed(windSpeed)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(width: 16),
+                    
+                    // Humidity
+                    Row(
+                      children: [
+                        const Icon(Icons.water_drop_outlined, color: Colors.white, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          humidity,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

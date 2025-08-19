@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/hourly_forecast_model.dart';
 import '../../data/models/weather_model.dart';
+import '../../data/providers/settings_provider.dart';
 
 class HourlyForecastWidget extends StatelessWidget {
   final List<HourlyForecast> hourlyForecasts;
@@ -27,38 +29,51 @@ class HourlyForecastWidget extends StatelessWidget {
       debugPrint('No hourly forecasts available to display');
     }
     
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4A6FA5), Color(0xFF6BC5F8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with title
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12.0),
-              child: Row(
-                children: [
-                  Text(
-                    'Hourly Forecast',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            const Text(
+              'Hourly Forecast',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
             ),
+            const SizedBox(height: 12),
             
             // Hourly forecast list
             SizedBox(
               height: 120,
               child: hourlyForecasts.isEmpty
-                  ? const Center(child: Text('No hourly forecast available'))
+                  ? const Center(
+                      child: Text(
+                        'No hourly forecast available',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
                   : ListView.builder(
                       controller: scrollController,
                       scrollDirection: Axis.horizontal,
@@ -70,25 +85,14 @@ class HourlyForecastWidget extends StatelessWidget {
                         
                         return Container(
                           width: 80,
-                          margin: const EdgeInsets.symmetric(horizontal: 2.0),
-                          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+                          margin: const EdgeInsets.only(right: 5),
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF4A6FA5), Color(0xFF6BC5F8)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(16),
                             border: isNow
                                 ? Border.all(
-                                    color: theme.colorScheme.primary,
+                                    color: Colors.white,
                                     width: 1.5,
                                   )
                                 : null,
@@ -107,42 +111,44 @@ class HourlyForecastWidget extends StatelessWidget {
                               ),
                               
                               // Weather icon
-                              Icon(
-                                _getWeatherIcon(forecast.weatherCode),
-                                size: 24,
-                                color: Colors.white,
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _getWeatherIcon(forecast.weatherCode),
+                                  size: 22,
+                                  color: Colors.white,
+                                ),
                               ),
                               
                               // Temperature
                               Text(
-                                '${forecast.temperature.round()}°',
+                                '${settings.formatTemperature(forecast.temperature)}',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
                                 ),
                               ),
                               
-                              // Precipitation chance
-                              if (forecast.precipitation > 0) ...[
-                                const SizedBox(height: 2),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white24,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                              // Wind and precipitation
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Wind
+                                  Row(
                                     children: [
                                       const Icon(
-                                        Icons.water_drop,
+                                        Icons.air,
                                         size: 12,
                                         color: Colors.white,
                                       ),
                                       const SizedBox(width: 2),
                                       Text(
-                                        '${(forecast.precipitation).round()}%',
+                                        '${settings.formatSpeed(forecast.windSpeed)}',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 10,
@@ -151,9 +157,32 @@ class HourlyForecastWidget extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
-                              
+                                  
+                                  // Add spacing if there's precipitation
+                                  if (forecast.precipitation > 0) ...[
+                                    const SizedBox(width: 6),
+                                    // Precipitation
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.water_drop,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          '${forecast.precipitation.round()}%',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ],
                           ),
                         );
@@ -179,9 +208,9 @@ class HourlyForecastWidget extends StatelessWidget {
     if (time.day == now.day) {
       return DateFormat('h a').format(time);
     } else if (time.day == now.day + 1) {
-      return 'Tom';
+      return '${DateFormat('h a').format(time)}';
     } else {
-      return DateFormat('MMM d').format(time);
+      return '${DateFormat('h a').format(time)}\n${DateFormat('MMM d').format(time)}';
     }
   }
   

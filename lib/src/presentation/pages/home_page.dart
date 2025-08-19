@@ -9,7 +9,6 @@ import '../../data/services/location_service.dart';
 import '../providers/weather_provider.dart';
 import '../../data/providers/settings_provider.dart';
 import '../widgets/weather_card.dart';
-import '../widgets/quick_stats_row.dart';
 import '../widgets/location_search_dialog.dart';
 import '../widgets/daily_forecast_widget.dart';
 import '../widgets/hourly_forecast_widget.dart';
@@ -333,38 +332,22 @@ class _HomePageState extends State<HomePage> {
                     temperature: weather.temperature,
                     condition: weather.condition,
                     lastUpdated: 'Updated: ${_formatTime(weather.time)}',
+                    windSpeed: weather.windSpeed,
+                    humidity: '${weather.relativeHumidity}%',
                     icon: _getWeatherIcon(weather.weatherCode),
                   ),
                   
-                  const SizedBox(height: 20),
-                  
-                  // Quick stats row (UV index, wind, humidity)
-                  QuickStatsRow(
-                    uvIndex: weather.uvIndex,
-                    windSpeed: weather.windSpeed,
-                    humidity: '${weather.relativeHumidity}%',
-                    cardBorderRadius: 16,
-                    spacing: 8,
-                  ),
-                  
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 6),
                   
                   // Hourly forecast section
                   if (weather.hourlyForecast?.isNotEmpty ?? false) ...[
                     HourlyForecastWidget(hourlyForecasts: weather.hourlyForecast!),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 0),
                   ],
                   
                   // Daily forecast section
                   if (weather.dailyForecast != null && weather.dailyForecast!.isNotEmpty)
                     DailyForecastWidget(forecastDays: weather.dailyForecast!),
-                    
-                  // Show loading indicator at the bottom when refreshing
-                  if (weatherProvider.isLoading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
                 ] else ...[
                   // No weather data available state
                   // No weather data available state
@@ -435,14 +418,64 @@ class _HomePageState extends State<HomePage> {
   }
   
   IconData _getWeatherIcon(int weatherCode) {
-    // Map weather codes to appropriate icons
-    if (weatherCode == 0) return Icons.wb_sunny; // Clear sky
-    if (weatherCode <= 3) return Icons.wb_cloudy; // Partly cloudy
-    if (weatherCode <= 19) return Icons.foggy; // Fog
-    if (weatherCode <= 29) return Icons.grain; // Drizzle
-    if (weatherCode <= 69) return Icons.umbrella; // Rain
-    if (weatherCode <= 79) return Icons.ac_unit; // Snow
-    if (weatherCode <= 99) return Icons.thunderstorm; // Thunderstorm
-    return Icons.help_outline; // Unknown
+    // WMO Weather interpretation codes (https://open-meteo.com/docs)
+    switch (weatherCode) {
+      // Clear sky
+      case 0:
+        return Icons.wb_sunny;
+      
+      // Mainly clear, partly cloudy, and overcast
+      case 1: // Mainly clear
+      case 2: // Partly cloudy
+        return Icons.cloud_queue;
+      case 3: // Overcast
+        return Icons.cloud;
+      
+      // Fog and depositing rime fog
+      case 45: // Fog
+      case 48: // Depositing rime fog
+        return Icons.foggy;
+      
+      // Drizzle: Light, moderate, and dense intensity
+      case 51: // Light drizzle
+      case 53: // Moderate drizzle
+      case 55: // Dense drizzle
+      case 56: // Light freezing drizzle
+      case 57: // Dense freezing drizzle
+        return Icons.grain;
+      
+      // Rain: Slight, moderate and heavy intensity
+      case 61: // Slight rain
+      case 63: // Moderate rain
+      case 65: // Heavy rain
+      case 80: // Slight rain showers
+      case 81: // Moderate rain showers
+      case 82: // Violent rain showers
+        return Icons.water_drop;
+      
+      // Freezing rain
+      case 66: // Light freezing rain
+      case 67: // Heavy freezing rain
+        return Icons.ac_unit;
+      
+      // Snow fall: Slight, moderate, and heavy intensity
+      case 71: // Slight snow fall
+      case 73: // Moderate snow fall
+      case 75: // Heavy snow fall
+      case 77: // Snow grains
+      case 85: // Slight snow showers
+      case 86: // Heavy snow showers
+        return Icons.ac_unit;
+      
+      // Thunderstorm: Slight or moderate
+      case 95: // Thunderstorm: Slight or moderate
+      case 96: // Thunderstorm with slight hail
+      case 99: // Thunderstorm with heavy hail
+        return Icons.thunderstorm;
+      
+      // Default icon for any unhandled codes
+      default:
+        return Icons.wb_sunny;
+    }
   }
 }

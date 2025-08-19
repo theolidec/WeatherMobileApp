@@ -7,8 +7,8 @@ class AppTheme {
       colorScheme: ColorScheme.light(
         primary: Colors.blue.shade700,
         secondary: Colors.blue.shade500,
-        surface: Colors.white,
-        background: Colors.grey.shade50,
+        surface: Colors.lightBlue.shade50,
+        background: Colors.lightBlue.shade100,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: Colors.black87,
@@ -34,8 +34,8 @@ class AppTheme {
       colorScheme: ColorScheme.dark(
         primary: Colors.blue.shade300,
         secondary: Colors.blue.shade200,
-        surface: Colors.grey.shade900,
-        background: Colors.grey.shade900,
+        surface: Colors.blueGrey.shade900,
+        background: Colors.blueGrey.shade900,
         onPrimary: Colors.black87,
         onSecondary: Colors.black87,
         onSurface: Colors.white,

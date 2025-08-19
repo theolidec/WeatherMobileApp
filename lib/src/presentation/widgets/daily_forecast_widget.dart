@@ -30,57 +30,71 @@ class DailyForecastWidget extends StatelessWidget {
       debugPrint('Last forecast day: ${forecastDays!.last.date} - ${forecastDays!.last.weatherCode}');
     }
     
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4A6FA5), Color(0xFF6BC5F8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 5.0, 16.0, 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '7-Day Forecast',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+            // Header with title and info icon
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '7-Day Forecast',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.info_outline, size: 20),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      _showWeatherIconsInfo(context);
-                    },
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.info_outline, size: 20, color: Colors.white),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () {
+                    _showWeatherIconsInfo(context);
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 8.0),
+            
+            const SizedBox(height: 2),
+            
+            // Daily forecast list
             SizedBox(
-              height: 140,
+              height: 160, // Slightly taller to accommodate the new layout
               child: forecastDays == null || forecastDays!.isEmpty
                   ? const Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.calendar_today, size: 32, color: Colors.grey),
+                          Icon(Icons.calendar_today, size: 32, color: Colors.white70),
                           SizedBox(height: 8),
-                          Text('No forecast data available', 
-                              style: TextStyle(fontSize: 14, color: Colors.grey)),
+                          Text(
+                            'No forecast data available',
+                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                          ),
                         ],
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       scrollDirection: Axis.horizontal,
                       itemCount: forecastDays!.length,
                       itemBuilder: (context, index) {
@@ -105,70 +119,111 @@ class DailyForecastWidget extends StatelessWidget {
     }
     
     return Container(
-      width: 85,  // Reduced width for a more compact look
-      margin: const EdgeInsets.symmetric(horizontal: 2.0),
-      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 4.0),
+      width: 90, // Slightly wider for better content fit
+      margin: const EdgeInsets.only(right: 5),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4A6FA5), Color(0xFF6BC5F8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: isToday
+            ? Border.all(
+                color: Colors.white,
+                width: 1.5,
+              )
+            : null,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          // Day and date
           Column(
             children: [
               Text(
                 isToday ? 'Today' : dayName,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w500,
                   color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                 ),
               ),
               Text(
                 DateFormat('d MMM').format(day.date),
                 style: const TextStyle(
-                  fontSize: 12,
                   color: Colors.white70,
+                  fontSize: 12,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4.0),
-          day.weatherCode != null 
-              ? Icon(
-                  _getWeatherIcon(day.weatherCode!), 
-                  size: 28,
+          
+          // Weather icon in a circle
+          if (day.weatherCode != null) ...[
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getWeatherIcon(day.weatherCode!),
+                size: 24,
+                color: Colors.white,
+              ),
+            ),
+          ],
+          
+          // Temperature range
+          Column(
+            children: [
+              // Max temperature
+              Text(
+                formatTemp(day.maxTemperature),
+                style: const TextStyle(
                   color: Colors.white,
-                )
-              : const Text('--', style: TextStyle(fontSize: 16)),
-          const SizedBox(height: 4.0),
-          Text(
-            formatTemp(day.maxTemperature),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              // Min temperature
+              Text(
+                formatTemp(day.minTemperature),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
-          Text(
-            formatTemp(day.minTemperature),
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
+          
+          // Precipitation chance if available
+          if (day.precipitationSum > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.water_drop,
+                    size: 12,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    '${day.precipitationSum.toStringAsFixed(1)}mm',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+        ].whereType<Widget>().toList(),
       ),
     );
   }
