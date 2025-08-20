@@ -26,14 +26,26 @@ class SettingsPage extends StatelessWidget {
                 title: 'Temperature Unit',
                 currentValue: settings.temperatureUnit == TemperatureUnit.celsius 
                     ? 'Celsius (°C)' 
-                    : 'Fahrenheit (°F)',
-                options: const ['Celsius (°C)', 'Fahrenheit (°F)'],
+                    : settings.temperatureUnit == TemperatureUnit.fahrenheit
+                        ? 'Fahrenheit (°F)'
+                        : 'Kelvin (°K)',
+                options: const ['Celsius (°C)', 'Fahrenheit (°F)', 'Kelvin (°K)'],
                 onSelected: (value) {
-                  settings.setTemperatureUnit(
-                    value == 'Celsius (°C)' 
-                        ? TemperatureUnit.celsius 
-                        : TemperatureUnit.fahrenheit,
-                  );
+                  TemperatureUnit unit;
+                  switch (value) {
+                    case 'Celsius (°C)':
+                      unit = TemperatureUnit.celsius;
+                      break;
+                    case 'Fahrenheit (°F)':
+                      unit = TemperatureUnit.fahrenheit;
+                      break;
+                    case 'Kelvin (°K)':
+                      unit = TemperatureUnit.kelvin;
+                      break;
+                    default:
+                      unit = TemperatureUnit.celsius;
+                  }
+                  settings.setTemperatureUnit(unit);
                 },
               );
             },

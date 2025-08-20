@@ -115,7 +115,16 @@ class DailyForecastWidget extends StatelessWidget {
     
     String formatTemp(double? temp) {
       if (temp == null) return '--';
-      return '${_formatTemperature(temp, settings.temperatureUnit)}°';
+      final value = _formatTemperature(temp, settings.temperatureUnit);
+      switch (settings.temperatureUnit) {
+        case TemperatureUnit.kelvin:
+          return '${value}°K';
+        case TemperatureUnit.fahrenheit:
+          return '${value}°F';
+        case TemperatureUnit.celsius:
+        default:
+          return '${value}°C';
+      }
     }
     
     return Container(
@@ -229,10 +238,15 @@ class DailyForecastWidget extends StatelessWidget {
   }
 
   String _formatTemperature(double temp, TemperatureUnit unit) {
-    final value = unit == TemperatureUnit.fahrenheit 
-        ? (temp * 9/5) + 32 
-        : temp;
-    return value.toStringAsFixed(0);
+    switch (unit) {
+      case TemperatureUnit.fahrenheit:
+        return ((temp * 9/5) + 32).toStringAsFixed(0);
+      case TemperatureUnit.kelvin:
+        return (temp + 273.15).toStringAsFixed(0);
+      case TemperatureUnit.celsius:
+      default:
+        return temp.toStringAsFixed(0);
+    }
   }
 
   void _showWeatherIconsInfo(BuildContext context) {

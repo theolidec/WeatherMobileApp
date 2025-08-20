@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum TemperatureUnit { celsius, fahrenheit }
+enum TemperatureUnit { celsius, fahrenheit, kelvin }
 enum SpeedUnit { kmh, mph, ms }
 
 enum PrecipitationUnit { mm, inches }
@@ -88,10 +88,15 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   String formatTemperature(double tempCelsius) {
-    if (_temperatureUnit == TemperatureUnit.fahrenheit) {
-      return '${(tempCelsius * 9/5 + 32).toStringAsFixed(1)}°F';
+    switch (_temperatureUnit) {
+      case TemperatureUnit.fahrenheit:
+        return '${(tempCelsius * 9/5 + 32).toStringAsFixed(1)}°F';
+      case TemperatureUnit.kelvin:
+        return '${(tempCelsius + 273.15).toStringAsFixed(1)}°K';
+      case TemperatureUnit.celsius:
+      default:
+        return '${tempCelsius.toStringAsFixed(1)}°C';
     }
-    return '${tempCelsius.toStringAsFixed(1)}°C';
   }
 
   String formatSpeed(double speedKmh) {
