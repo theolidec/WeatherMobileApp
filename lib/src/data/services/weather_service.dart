@@ -106,8 +106,8 @@ class WeatherService {
             }
           }
           
-          // Limit to current hour + next 9 hours (10 hours total)
-          final endIndex = startIndex + 10 < times.length ? startIndex + 10 : times.length;
+          // Limit to current hour + next 11 hours (12 hours total)
+          final endIndex = startIndex + 12 < times.length ? startIndex + 13 : times.length;
           
           debugPrint('Displaying hourly forecast from index $startIndex to $endIndex');
           
