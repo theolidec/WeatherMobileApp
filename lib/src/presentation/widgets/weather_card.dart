@@ -10,6 +10,7 @@ class WeatherCard extends StatelessWidget {
   final String lastUpdated;
   final IconData icon;
   final double windSpeed;
+  final int windDirection;
   final String humidity;
 
   const WeatherCard({
@@ -18,9 +19,21 @@ class WeatherCard extends StatelessWidget {
     required this.condition,
     required this.lastUpdated,
     required this.windSpeed,
+    required this.windDirection,
     required this.humidity,
     this.icon = Icons.cloud,
   }) : super(key: key);
+  
+  String _getWindDirection(int degrees) {
+    if (degrees >= 337.5 || degrees < 22.5) return 'N';
+    if (degrees < 67.5) return 'NE';
+    if (degrees < 112.5) return 'E';
+    if (degrees < 157.5) return 'SE';
+    if (degrees < 202.5) return 'S';
+    if (degrees < 247.5) return 'SW';
+    if (degrees < 292.5) return 'W';
+    return 'NW';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +120,7 @@ class WeatherCard extends StatelessWidget {
                         const Icon(Icons.air, color: Colors.white, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          '${settings.formatSpeed(windSpeed)}',
+                          '${_getWindDirection(windDirection)} ${settings.formatSpeed(windSpeed)} ',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,

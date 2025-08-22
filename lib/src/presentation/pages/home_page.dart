@@ -333,6 +333,7 @@ class _HomePageState extends State<HomePage> {
                     condition: weather.condition,
                     lastUpdated: 'Updated: ${_formatTime(weather.time)}',
                     windSpeed: weather.windSpeed,
+                    windDirection: weather.windDirection,
                     humidity: '${weather.relativeHumidity}%',
                     icon: _getWeatherIcon(weather.weatherCode),
                   ),
