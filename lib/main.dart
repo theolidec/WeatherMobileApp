@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'src/theme/theme_provider.dart';
 import 'src/presentation/pages/home_page.dart';
@@ -6,7 +7,13 @@ import 'src/theme/app_theme.dart';
 import 'src/presentation/providers/weather_provider.dart';
 import 'src/data/providers/settings_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  
   runApp(
     MultiProvider(
       providers: [
