@@ -11,7 +11,7 @@ class _WeatherIconInfo {
   const _WeatherIconInfo(this.icon, this.description);
 }
 
-class DailyForecastWidget extends StatelessWidget {
+class DailyForecastWidget extends StatefulWidget {
   final List<DailyForecast>? forecastDays;
   
   const DailyForecastWidget({
@@ -20,14 +20,36 @@ class DailyForecastWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<DailyForecastWidget> createState() => _DailyForecastWidgetState();
+}
+
+class _DailyForecastWidgetState extends State<DailyForecastWidget> {
+  int? _selectedDayIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    // Select today by default if available
+    if (widget.forecastDays != null && widget.forecastDays!.isNotEmpty) {
+      final now = DateTime.now();
+      final todayIndex = widget.forecastDays!.indexWhere(
+        (day) => day.date.year == now.year && 
+                day.date.month == now.month && 
+                day.date.day == now.day
+      );
+      _selectedDayIndex = todayIndex >= 0 ? todayIndex : 0;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final settings = Provider.of<SettingsProvider>(context);
     
     // Debug information
-    debugPrint('DailyForecastWidget - Building with ${forecastDays?.length ?? 0} forecast days');
-    if (forecastDays != null && forecastDays!.isNotEmpty) {
-      debugPrint('First forecast day: ${forecastDays!.first.date} - ${forecastDays!.first.weatherCode}');
-      debugPrint('Last forecast day: ${forecastDays!.last.date} - ${forecastDays!.last.weatherCode}');
+    debugPrint('DailyForecastWidget - Building with ${widget.forecastDays?.length ?? 0} forecast days');
+    if (widget.forecastDays != null && widget.forecastDays!.isNotEmpty) {
+      debugPrint('First forecast day: ${widget.forecastDays!.first.date} - ${widget.forecastDays!.first.weatherCode}');
+      debugPrint('Last forecast day: ${widget.forecastDays!.last.date} - ${widget.forecastDays!.last.weatherCode}');
     }
     
     return Container(
@@ -58,7 +80,7 @@ class DailyForecastWidget extends StatelessWidget {
               children: [
                 const Text(
                   '7-Day Forecast',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -75,12 +97,12 @@ class DailyForecastWidget extends StatelessWidget {
               ],
             ),
             
-            const SizedBox(height: 2),
+            const SizedBox(height: 10),
             
             // Daily forecast list
             SizedBox(
-              height: 160, // Slightly taller to accommodate the new layout
-              child: forecastDays == null || forecastDays!.isEmpty
+              height: 170, // Slightly taller to prevent overflow
+              child: widget.forecastDays == null || widget.forecastDays!.isEmpty
                   ? const Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -96,20 +118,172 @@ class DailyForecastWidget extends StatelessWidget {
                     )
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: forecastDays!.length,
+                      itemCount: widget.forecastDays!.length,
                       itemBuilder: (context, index) {
-                        final day = forecastDays![index];
-                        return _buildForecastItem(context, day, settings);
+                        final day = widget.forecastDays![index];
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedDayIndex = index),
+                          child: _buildForecastItem(
+                            context, 
+                            day, 
+                            settings,
+                            isSelected: _selectedDayIndex == index,
+                          ),
+                        );
                       },
                     ),
             ),
+            
+            // Daily conclusion section
+            if (_selectedDayIndex != null && widget.forecastDays != null && widget.forecastDays!.isNotEmpty)
+              _buildDailyConclusion(widget.forecastDays![_selectedDayIndex!], settings),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildForecastItem(BuildContext context, DailyForecast day, SettingsProvider settings) {
+  Widget _buildDailyConclusion(DailyForecast day, SettingsProvider settings) {
+    String getWindDirection(int degrees) {
+      if (degrees >= 337.5 || degrees < 22.5) return 'N';
+      if (degrees < 67.5) return 'NE';
+      if (degrees < 112.5) return 'E';
+      if (degrees < 157.5) return 'SE';
+      if (degrees < 202.5) return 'S';
+      if (degrees < 247.5) return 'SW';
+      if (degrees < 292.5) return 'W';
+      return 'NW';
+    }
+
+    String formatTemp(double? temp) {
+      if (temp == null) return '--';
+      final value = _formatTemperature(temp, settings.temperatureUnit);
+      switch (settings.temperatureUnit) {
+        case TemperatureUnit.kelvin:
+          return '${value}°K';
+        case TemperatureUnit.fahrenheit:
+          return '${value}°F';
+        case TemperatureUnit.celsius:
+        default:
+          return '${value}°C';
+      }
+    }
+    
+    String formatSpeed(double? speedKmh) {
+      if (speedKmh == null) return '--';
+      final value = _formatSpeed(speedKmh, settings.speedUnit);
+      return '$value ${_getSpeedUnitSuffix(settings.speedUnit)}';
+    }
+    
+    String formatPrecipitation(double? mm) {
+      if (mm == null) return '--';
+      final value = _formatPrecipitation(mm, settings.precipitationUnit);
+      return '$value ${_getPrecipitationUnitSuffix(settings.precipitationUnit)}';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Daily Overview - ${DateFormat('EEEE, MMM d').format(day.date)}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildDetailItem(
+                Icons.thermostat_outlined,
+                'High / Low',
+                '${formatTemp(day.maxTemperature)} / ${formatTemp(day.minTemperature)}',
+              ),
+              _buildDetailItem(
+                Icons.water_drop_outlined,
+                'Precipitation',
+                formatPrecipitation(day.precipitationSum),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildDetailItem(
+                Icons.air,
+                'Wind',
+                '${_formatSpeed(day.windSpeedMax, settings.speedUnit)} ${_getSpeedUnitSuffix(settings.speedUnit)} ${getWindDirection(day.windDirectionDominant)}',
+              ),
+              _buildDetailItem(
+                Icons.timer_outlined,
+                'Precip. Hours',
+                '${day.precipitationHours.toStringAsFixed(1)} h',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (day.sunrise != null && day.sunset != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildDetailItem(
+                  Icons.wb_sunny,
+                  'Sunrise',
+                  DateFormat('h:mm a').format(day.sunrise!), // Non-null assertion is safe here due to the if condition
+                ),
+                _buildDetailItem(
+                  Icons.nights_stay,
+                  'Sunset',
+                  DateFormat('h:mm a').format(day.sunset!), // Non-null assertion is safe here due to the if condition
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(IconData icon, String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.white70),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForecastItem(BuildContext context, DailyForecast day, SettingsProvider settings, {bool isSelected = false}) {
     final dayName = DateFormat('E').format(day.date);
     final isToday = day.date.day == DateTime.now().day;
     
@@ -128,24 +302,26 @@ class DailyForecastWidget extends StatelessWidget {
     }
     
     return Container(
-      width: 90, // Slightly wider for better content fit
-      margin: const EdgeInsets.only(right: 5),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+      width: 78, // Further reduced width
+      margin: const EdgeInsets.only(right: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: isToday
+        color: isSelected ? Colors.white.withOpacity(0.25) : Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14), // Slightly smaller border radius
+        border: isToday || isSelected
             ? Border.all(
                 color: Colors.white,
-                width: 1.5,
+                width: isSelected ? 1.5 : 1.0, // Thinner borders
               )
             : null,
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Day and date
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 isToday ? 'Today' : dayName,
@@ -167,47 +343,53 @@ class DailyForecastWidget extends StatelessWidget {
           
           // Weather icon in a circle
           if (day.weatherCode != null) ...[
+            const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 _getWeatherIcon(day.weatherCode!),
-                size: 24,
+                size: 22, // Slightly smaller icon
                 color: Colors.white,
               ),
             ),
           ],
           
           // Temperature range
-          Column(
-            children: [
-              // Max temperature
-              Text(
-                formatTemp(day.maxTemperature),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Max temperature
+                Text(
+                  formatTemp(day.maxTemperature),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14, // Slightly smaller font
+                  ),
                 ),
-              ),
-              // Min temperature
-              Text(
-                formatTemp(day.minTemperature),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
+                // Min temperature
+                Text(
+                  formatTemp(day.minTemperature),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12, // Slightly smaller font
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           
           // Precipitation chance if available
-          if (day.precipitationSum > 0)
+          if (day.precipitationSum > 0) ...[
+            const SizedBox(height: 2),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
                 color: Colors.white24,
                 borderRadius: BorderRadius.circular(10),
@@ -232,21 +414,57 @@ class DailyForecastWidget extends StatelessWidget {
                 ],
               ),
             ),
+          ],
         ].whereType<Widget>().toList(),
       ),
     );
   }
 
-  String _formatTemperature(double temp, TemperatureUnit unit) {
+  String _formatTemperature(double tempCelsius, TemperatureUnit unit) {
     switch (unit) {
       case TemperatureUnit.fahrenheit:
-        return ((temp * 9/5) + 32).toStringAsFixed(0);
+        return (tempCelsius * 9/5 + 32).toStringAsFixed(1);
       case TemperatureUnit.kelvin:
-        return (temp + 273.15).toStringAsFixed(0);
+        return (tempCelsius + 273.15).toStringAsFixed(1);
       case TemperatureUnit.celsius:
       default:
-        return temp.toStringAsFixed(0);
+        return tempCelsius.toStringAsFixed(1);
     }
+  }
+
+  String _formatSpeed(double speedKmh, SpeedUnit unit) {
+    switch (unit) {
+      case SpeedUnit.mph:
+        return (speedKmh * 0.621371).toStringAsFixed(1);
+      case SpeedUnit.ms:
+        return (speedKmh / 3.6).toStringAsFixed(1);
+      case SpeedUnit.kmh:
+      default:
+        return speedKmh.toStringAsFixed(1);
+    }
+  }
+
+  String _formatPrecipitation(double mm, PrecipitationUnit unit) {
+    if (unit == PrecipitationUnit.inches) {
+      return (mm * 0.0393701).toStringAsFixed(2);
+    }
+    return mm.toStringAsFixed(1);
+  }
+
+  String _getSpeedUnitSuffix(SpeedUnit unit) {
+    switch (unit) {
+      case SpeedUnit.mph:
+        return 'mph';
+      case SpeedUnit.ms:
+        return 'm/s';
+      case SpeedUnit.kmh:
+      default:
+        return 'km/h';
+    }
+  }
+
+  String _getPrecipitationUnitSuffix(PrecipitationUnit unit) {
+    return unit == PrecipitationUnit.inches ? 'in' : 'mm';
   }
 
   void _showWeatherIconsInfo(BuildContext context) {

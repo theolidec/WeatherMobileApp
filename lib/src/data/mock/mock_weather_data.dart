@@ -1,4 +1,4 @@
-import 'package:weather_app/src/data/models/weather_model.dart';
+import 'package:core_weather/src/data/models/weather_model.dart';
 import 'package:intl/intl.dart';
 
 class MockWeatherData {

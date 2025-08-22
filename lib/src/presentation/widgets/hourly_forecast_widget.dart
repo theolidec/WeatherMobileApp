@@ -55,7 +55,7 @@ class HourlyForecastWidget extends StatelessWidget {
           children: [
             // Header with title
             const Text(
-              'Hourly Forecast',
+              '10-Hour Forecast',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -84,9 +84,9 @@ class HourlyForecastWidget extends StatelessWidget {
                         final isNow = _isSameHour(time, now);
                         
                         return Container(
-                          width: 80,
-                          margin: const EdgeInsets.only(right: 5),
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          width: 75, // Reduced from 80
+                          margin: const EdgeInsets.only(right: 4),
+                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(16),
@@ -106,20 +106,20 @@ class HourlyForecastWidget extends StatelessWidget {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                                  fontSize: 11, // Slightly smaller font
                                 ),
                               ),
                               
                               // Weather icon
                               Container(
-                                padding: const EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(4), // Reduced padding
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   _getWeatherIcon(forecast.weatherCode),
-                                  size: 22,
+                                  size: 20, // Slightly smaller icon
                                   color: Colors.white,
                                 ),
                               ),
@@ -130,57 +130,56 @@ class HourlyForecastWidget extends StatelessWidget {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 16,
+                                  fontSize: 15, // Slightly smaller font
                                 ),
                               ),
                               
-                              // Wind and precipitation
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              // Wind and precipitation in a column to save horizontal space
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   // Wind
                                   Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Icon(
                                         Icons.air,
-                                        size: 12,
+                                        size: 10,
                                         color: Colors.white,
                                       ),
-                                      const SizedBox(width: 2),
+                                      const SizedBox(width: 1),
                                       Text(
-                                        '${settings.formatSpeed(forecast.windSpeed)}',
+                                        settings.formatSpeed(forecast.windSpeed),
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 10,
+                                          fontSize: 9,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
                                   ),
                                   
-                                  // Add spacing if there's precipitation
-                                  if (forecast.precipitation > 0) ...[
-                                    const SizedBox(width: 6),
-                                    // Precipitation
+                                  // Precipitation if any
+                                  if (forecast.precipitation > 0) 
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Icon(
                                           Icons.water_drop,
-                                          size: 12,
+                                          size: 10,
                                           color: Colors.white,
                                         ),
-                                        const SizedBox(width: 2),
+                                        const SizedBox(width: 1),
                                         Text(
                                           settings.formatPrecipitation(forecast.precipitation),
                                           style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 10,
+                                            fontSize: 9,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ],
                                 ],
                               ),
                             ],

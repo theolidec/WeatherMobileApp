@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../models/location_result.dart';
+import 'package:core_weather/src/data/models/location_result.dart';
 
 extension LocationResultExt on LocationResult {
   static LocationResult fromNominatimJson(Map<String, dynamic> json) {

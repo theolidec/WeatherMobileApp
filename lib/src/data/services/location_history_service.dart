@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:weather_app/src/data/models/location_result.dart';
+import 'package:core_weather/src/data/models/location_result.dart';
 import 'dart:convert';
 
 class LocationHistoryService {

@@ -40,7 +40,7 @@ class WeatherService {
         'longitude=$lon&'
         'current_weather=true&'
         'hourly=temperature_2m,apparent_temperature,precipitation,rain,showers,snowfall,weathercode,cloudcover,windspeed_10m,winddirection_10m,windgusts_10m,relativehumidity_2m,uv_index&'
-        'daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_hours,windspeed_10m_max,winddirection_10m_dominant&'
+        'daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_hours,windspeed_10m_max,winddirection_10m_dominant,sunrise,sunset&'
         'timezone=auto&'
         'forecast_days=7'  // Get 7-day forecast
       );

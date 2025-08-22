@@ -1,4 +1,4 @@
-package com.consensuscast.weather_app
+package com.coremobile.weather
 
 import io.flutter.embedding.android.FlutterActivity
 

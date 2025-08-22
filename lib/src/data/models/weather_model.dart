@@ -10,6 +10,8 @@ class DailyForecast {
   final double precipitationHours;
   final double windSpeedMax;
   final int windDirectionDominant;
+  final DateTime? sunrise;
+  final DateTime? sunset;
 
   const DailyForecast({
     required this.date,
@@ -20,9 +22,19 @@ class DailyForecast {
     required this.precipitationHours,
     required this.windSpeedMax,
     required this.windDirectionDominant,
+    this.sunrise,
+    this.sunset,
   });
 
   factory DailyForecast.fromJson(Map<String, dynamic> json, int index) {
+    DateTime? parseDateTime(String? timeStr) {
+      try {
+        return timeStr != null ? DateTime.parse(timeStr) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
     return DailyForecast(
       date: DateTime.parse(json['time'][index]),
       maxTemperature: (json['temperature_2m_max'][index] as num).toDouble(),
@@ -32,6 +44,8 @@ class DailyForecast {
       precipitationHours: (json['precipitation_hours'][index] as num).toDouble(),
       windSpeedMax: (json['windspeed_10m_max'][index] as num).toDouble(),
       windDirectionDominant: json['winddirection_10m_dominant'][index] as int,
+      sunrise: json['sunrise'] != null ? parseDateTime(json['sunrise'][index]) : null,
+      sunset: json['sunset'] != null ? parseDateTime(json['sunset'][index]) : null,
     );
   }
 
@@ -45,6 +59,8 @@ class DailyForecast {
       'precipitation_hours': precipitationHours,
       'windspeed_10m_max': windSpeedMax,
       'winddirection_10m_dominant': windDirectionDominant,
+      if (sunrise != null) 'sunrise': sunrise!.toIso8601String(),
+      if (sunset != null) 'sunset': sunset!.toIso8601String(),
     };
   }
 }
