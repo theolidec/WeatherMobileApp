@@ -208,11 +208,18 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
                 'High / Low',
                 '${formatTemp(day.maxTemperature)} / ${formatTemp(day.minTemperature)}',
               ),
-              _buildDetailItem(
-                Icons.water_drop_outlined,
-                'Precipitation',
-                formatPrecipitation(day.precipitationSum),
-              ),
+              if (day.sunrise != null && day.sunset != null) ...[
+                _buildDetailItem(
+                  Icons.wb_sunny,
+                  'Sunrise',
+                  DateFormat('h:mm a').format(day.sunrise!),
+                ),
+                _buildDetailItem(
+                  Icons.nights_stay,
+                  'Sunset',
+                  DateFormat('h:mm a').format(day.sunset!),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -224,30 +231,22 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
                 'Wind',
                 '${_formatSpeed(day.windSpeedMax, settings.speedUnit)} ${_getSpeedUnitSuffix(settings.speedUnit)} ${getWindDirection(day.windDirectionDominant)}',
               ),
-              _buildDetailItem(
-                Icons.timer_outlined,
-                'Precip. Hours',
-                '${day.precipitationHours.toStringAsFixed(1)} h',
-              ),
+              if (day.precipitationSum > 0) ...[
+                _buildDetailItem(
+                  Icons.water_drop_outlined,
+                  'Precipitation',
+                  formatPrecipitation(day.precipitationSum),
+                ),
+                _buildDetailItem(
+                  Icons.timer_outlined,
+                  'Precip. Hours',
+                  '${day.precipitationHours.toStringAsFixed(1)} h',
+                ),
+              ] else
+                // Empty container to maintain layout
+                const SizedBox(width: 0),
             ],
           ),
-          const SizedBox(height: 12),
-          if (day.sunrise != null && day.sunset != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildDetailItem(
-                  Icons.wb_sunny,
-                  'Sunrise',
-                  DateFormat('h:mm a').format(day.sunrise!), // Non-null assertion is safe here due to the if condition
-                ),
-                _buildDetailItem(
-                  Icons.nights_stay,
-                  'Sunset',
-                  DateFormat('h:mm a').format(day.sunset!), // Non-null assertion is safe here due to the if condition
-                ),
-              ],
-            ),
         ],
       ),
     );

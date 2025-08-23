@@ -55,7 +55,7 @@ class HourlyForecastWidget extends StatelessWidget {
           children: [
             // Header with title
             const Text(
-              '12-Hour Forecast',
+              '24-Hour Forecast',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
