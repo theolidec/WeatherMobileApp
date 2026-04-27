@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'hourly_forecast_model.dart';
+import '../../utils/weather_utils.dart';
 
 class DailyForecast {
   final DateTime date;
@@ -99,14 +101,8 @@ class WeatherModel {
   }
 
   String _getWeatherCondition(int code) {
-    // Simplified weather condition based on WMO Weather interpretation codes
-    if (code < 1) return 'Clear sky';
-    if (code < 3) return 'Mainly clear';
-    if (code < 50) return 'Fog';
-    if (code < 70) return 'Drizzle';
-    if (code < 80) return 'Rain';
-    if (code < 90) return 'Snow';
-    return 'Thunderstorm';
+    // Use the WeatherUtils for consistent condition translation
+    return WeatherUtils.getWeatherCondition(code, isDay: true);
   }
 
   Map<String, dynamic> toJson() {

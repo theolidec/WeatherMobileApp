@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../localization/app_localizations.dart';
 import '../../data/models/location_result.dart';
 import '../../data/services/location_history_service.dart';
 import '../../data/services/location_service.dart';
@@ -31,6 +33,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _initializeApp();
+    _setupAutoRefresh();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This will be called when dependencies change, including when settings are updated
     _setupAutoRefresh();
   }
 
@@ -145,17 +154,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Show location search dialog
-  void _showLocationSearchDialog() {
-    showDialog(
+  void _showLocationSearch() async {
+    final location = await showDialog<LocationResult>(
       context: context,
       builder: (context) => const LocationSearchDialog(),
-    ).then((location) {
-      // This will be called when the dialog is closed with a location
-      if (location != null) {
-        // Trigger refresh when a new location is selected
-        _onRefresh();
-      }
-    });
+    );
+
+    if (location != null && mounted) {
+      final weatherProvider = context.read<WeatherProvider>();
+      await weatherProvider.fetchWeather(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        locationName: location.getShortAddress(),
+      );
+      
+      // Save to location history
+      await _locationHistoryService.addToHistory(location);
+    }
   }
 
   @override
@@ -164,13 +179,6 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
   
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // This will be called when dependencies change, including when settings are updated
-    _setupAutoRefresh();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -188,7 +196,7 @@ class _HomePageState extends State<HomePage> {
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
               Text(
-                'Fetching weather data...',
+                'fetching_weather_data'.trWithContext(context),
                 style: theme.textTheme.titleMedium,
               ),
             ],
@@ -267,7 +275,7 @@ class _HomePageState extends State<HomePage> {
                         // Location icon with search functionality
                         IconButton(
                           icon: const Icon(Icons.location_on_outlined),
-                          onPressed: _showLocationSearchDialog,
+                          onPressed: _showLocationSearch,
                           tooltip: 'Change location',
                           style: IconButton.styleFrom(
                             backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
@@ -282,7 +290,7 @@ class _HomePageState extends State<HomePage> {
                         // Location name with tap to search
                         Expanded(
                           child: InkWell(
-                            onTap: _showLocationSearchDialog,
+                            onTap: _showLocationSearch,
                             borderRadius: BorderRadius.circular(12),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -307,12 +315,12 @@ class _HomePageState extends State<HomePage> {
                         
                         // Settings button
                         IconButton(
-                          icon: const Icon(Icons.settings_outlined),
+                          icon: const Icon(Icons.settings),
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const SettingsPage()),
                           ),
-                          tooltip: 'Settings',
+                          tooltip: 'settings'.tr(),
                           style: IconButton.styleFrom(
                             backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
                             shape: RoundedRectangleBorder(
@@ -331,7 +339,7 @@ class _HomePageState extends State<HomePage> {
                   WeatherCard(
                     temperature: weather.temperature,
                     condition: weather.condition,
-                    lastUpdated: 'Updated: ${_formatTime(weather.time)}',
+                    lastUpdated: '${'updated'.tr()}: ${_formatTime(weather.time)}',
                     windSpeed: weather.windSpeed,
                     windDirection: weather.windDirection,
                     humidity: '${weather.relativeHumidity}%',
@@ -350,7 +358,6 @@ class _HomePageState extends State<HomePage> {
                   if (weather.dailyForecast != null && weather.dailyForecast!.isNotEmpty)
                     DailyForecastWidget(forecastDays: weather.dailyForecast!),
                 ] else ...[
-                  // No weather data available state
                   // No weather data available state
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5,
@@ -387,7 +394,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0, bottom: 4.0),
                   child: Text(
-                    'Weather Data From Open-Meteo API',
+                    '${'weather_data_from'.tr()} Open-Meteo API',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
@@ -415,7 +422,7 @@ class _HomePageState extends State<HomePage> {
   }
   
   String _formatTime(DateTime time) {
-    return DateFormat('h:mm a').format(time);
+    return DateFormat('HH:mm').format(time);
   }
   
   IconData _getWeatherIcon(int weatherCode) {

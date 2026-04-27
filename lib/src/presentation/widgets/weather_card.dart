@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../data/providers/settings_provider.dart';
+import '../../utils/weather_utils.dart';
 
 /// A large card displaying current weather conditions including temperature, weather state,
 /// wind speed, and humidity.
@@ -34,6 +36,19 @@ class WeatherCard extends StatelessWidget {
     if (degrees < 292.5) return 'W';
     return 'NW';
   }
+  
+  String _formatTemperature(double temp, bool isCelsius) {
+    if (isCelsius) {
+      return '${temp.toStringAsFixed(0)}°C';
+    } else {
+      // Convert to Fahrenheit
+      final fahrenheit = (temp * 9/5) + 32;
+      return '${fahrenheit.toStringAsFixed(0)}°F';
+    }
+  }
+  
+  // Format wind speed using the settings provider to ensure consistent units
+  // This method is kept for backward compatibility but the main card uses SettingsProvider directly
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +103,9 @@ class WeatherCard extends StatelessWidget {
                 
                 const SizedBox(height: 4), // Vertical spacing
                 
-                // Weather condition
+                // Weather condition with translation
                 Text(
-                  condition, 
+                  WeatherUtils.getWeatherCondition(int.tryParse(condition) ?? 0, isDay: true),
                   style: const TextStyle(
                     color: Colors.white, 
                     fontSize: 18,
@@ -110,42 +125,38 @@ class WeatherCard extends StatelessWidget {
                   ),
                 ),
                 
-                // Wind and humidity row
+                // Wind and humidity rows
                 const SizedBox(height: 8),
+                // Wind speed row
                 Row(
                   children: [
-                    // Wind speed
-                    Row(
-                      children: [
-                        const Icon(Icons.air, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${_getWindDirection(windDirection)} ${settings.formatSpeed(windSpeed)} ',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                    const Icon(Icons.air, color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${'wind_speed'.tr()}: ${settings.formatSpeed(windSpeed)} ${_getWindDirection(windDirection)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    
-                    const SizedBox(width: 16),
-                    
-                    // Humidity
-                    Row(
-                      children: [
-                        const Icon(Icons.water_drop_outlined, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          humidity,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                  ],
+                ),
+                
+                const SizedBox(height: 4),
+                
+                // Humidity row
+                Row(
+                  children: [
+                    const Icon(Icons.water_drop_outlined, color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${'humidity'.tr()}: $humidity',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

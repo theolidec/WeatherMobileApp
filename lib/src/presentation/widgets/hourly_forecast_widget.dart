@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../data/models/hourly_forecast_model.dart';
 import '../../data/models/weather_model.dart';
 import '../../data/providers/settings_provider.dart';
@@ -54,8 +55,8 @@ class HourlyForecastWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with title
-            const Text(
-              '24-Hour Forecast',
+            Text(
+              '${'hourly_forecast'.tr()}',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -205,7 +206,7 @@ class HourlyForecastWidget extends StatelessWidget {
     if (isNow) return 'Now';
     final now = DateTime.now();
     if (time.day == now.day) {
-      return DateFormat('h a').format(time);
+      return DateFormat('HH:mm').format(time);
     } else if (time.day == now.day + 1) {
       return '${DateFormat('h a').format(time)}';
     } else {

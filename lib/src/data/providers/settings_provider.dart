@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum TemperatureUnit { celsius, fahrenheit, kelvin }
 enum SpeedUnit { kmh, mph, ms }
@@ -7,16 +8,15 @@ enum SpeedUnit { kmh, mph, ms }
 enum PrecipitationUnit { mm, inches }
 
 enum RefreshInterval {
-  fiveMinutes(5, '5 minutes'),
-  fifteenMinutes(15, '15 minutes'),
-  thirtyMinutes(30, '30 minutes'),
-  oneHour(60, '1 hour'),
-  twoHours(120, '2 hours');
+  fiveMinutes(5),
+  fifteenMinutes(15),
+  thirtyMinutes(30),
+  oneHour(60),
+  twoHours(120);
 
   final int minutes;
-  final String displayName;
   
-  const RefreshInterval(this.minutes, this.displayName);
+  const RefreshInterval(this.minutes);
   
   static RefreshInterval fromMinutes(int minutes) {
     return RefreshInterval.values.firstWhere(
@@ -31,18 +31,21 @@ class SettingsProvider extends ChangeNotifier {
   static const String _speedUnitKey = 'speed_unit';
   static const String _precipitationUnitKey = 'precipitation_unit';
   static const String _refreshIntervalKey = 'refresh_interval';
+  static const String _languageKey = 'language';
   static const int _defaultRefreshInterval = 15; // minutes
   
   TemperatureUnit _temperatureUnit = TemperatureUnit.celsius;
   SpeedUnit _speedUnit = SpeedUnit.kmh;
   PrecipitationUnit _precipitationUnit = PrecipitationUnit.mm;
   int _refreshInterval = _defaultRefreshInterval;
+  String _language = 'en';
 
   TemperatureUnit get temperatureUnit => _temperatureUnit;
   SpeedUnit get speedUnit => _speedUnit;
   PrecipitationUnit get precipitationUnit => _precipitationUnit;
   int get refreshIntervalMinutes => _refreshInterval;
   RefreshInterval get refreshInterval => RefreshInterval.fromMinutes(_refreshInterval);
+  String get language => _language;
 
   bool get isCelsius => _temperatureUnit == TemperatureUnit.celsius;
   bool get isKmh => _speedUnit == SpeedUnit.kmh;
@@ -66,6 +69,7 @@ class SettingsProvider extends ChangeNotifier {
       prefs.getInt(_precipitationUnitKey) ?? PrecipitationUnit.mm.index
     ];
     _refreshInterval = prefs.getInt(_refreshIntervalKey) ?? _defaultRefreshInterval;
+    _language = prefs.getString(_languageKey) ?? 'en';
     notifyListeners();
   }
 
@@ -133,6 +137,20 @@ class SettingsProvider extends ChangeNotifier {
     _refreshInterval = interval.minutes;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_refreshIntervalKey, _refreshInterval);
+    notifyListeners();
+  }
+
+  Future<void> setLanguage(String languageCode) async {
+    if (_language == languageCode) return;
+    
+    _language = languageCode;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_languageKey, languageCode);
+    } catch (e) {
+      debugPrint('Error saving language preference: $e');
+    }
+    
     notifyListeners();
   }
 }

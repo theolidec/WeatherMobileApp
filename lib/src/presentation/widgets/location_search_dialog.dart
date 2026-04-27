@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../localization/app_localizations.dart';
 import '../../data/models/location_result.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/location_history_service.dart';
@@ -32,16 +34,16 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
     if (_error != null) {
       return Center(
         child: Text(
-          _error!,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
+          context.tr('search_location'),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
       );
     }
 
     if (_isSearching) {
       if (_searchResults.isEmpty) {
-        return const Center(
-          child: Text('No locations found'),
+        return Center(
+          child: Text('no_locations_found'.trWithContext(context)),
         );
       }
 
@@ -57,11 +59,26 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
     }
   }
 
+  Widget _buildNoRecentSearches() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.history, size: 48, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            'your_recent_locations_will_appear_here'.trWithContext(context),
+            style: const TextStyle(color: Colors.grey, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRecentLocations() {
     if (_recentLocations.isEmpty) {
-      return const Center(
-        child: Text('Your recent locations will appear here'),
-      );
+      return _buildNoRecentSearches();
     }
 
     return Column(
@@ -71,9 +88,9 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              const Text(
-                'Recent Locations',
-                style: TextStyle(
+              Text(
+                'recent_locations'.trWithContext(context),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -84,7 +101,7 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
                   await _historyService.clearHistory();
                   await _loadRecentLocations();
                 },
-                child: const Text('Clear'),
+                child: Text('clear'.trWithContext(context)),
               ),
             ],
           ),
@@ -231,9 +248,9 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
             children: [
               Row(
                 children: [
-                  const Text(
-                    'Search Location',
-                    style: TextStyle(
+                  Text(
+                    'search_location'.trWithContext(context),
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -250,7 +267,7 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search for a location...',
+                  hintText: 'search_location'.trWithContext(context),
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../data/models/weather_model.dart';
 import '../../data/providers/settings_provider.dart';
 
@@ -78,8 +79,8 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '7-Day Forecast',
+                Text(
+                  '7_day_forecast'.tr(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -192,7 +193,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Daily Overview - ${DateFormat('EEEE, MMM d').format(day.date)}',
+            '${'daily_overview'.tr()} - ${DateFormat('EEEE, d MMM', Localizations.localeOf(context).toString()).format(day.date)}',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -205,19 +206,19 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
             children: [
               _buildDetailItem(
                 Icons.thermostat_outlined,
-                'High / Low',
+                '${'high'.tr()} / ${'low'.tr()}',
                 '${formatTemp(day.maxTemperature)} / ${formatTemp(day.minTemperature)}',
               ),
               if (day.sunrise != null && day.sunset != null) ...[
                 _buildDetailItem(
                   Icons.wb_sunny,
-                  'Sunrise',
-                  DateFormat('h:mm a').format(day.sunrise!),
+                  '${'sunrise'.tr()}',
+                  DateFormat('HH:mm', Localizations.localeOf(context).toString()).format(day.sunrise!),
                 ),
                 _buildDetailItem(
                   Icons.nights_stay,
-                  'Sunset',
-                  DateFormat('h:mm a').format(day.sunset!),
+                  '${'sunset'.tr()}',
+                  DateFormat('HH:mm', Localizations.localeOf(context).toString()).format(day.sunset!),
                 ),
               ],
             ],
@@ -228,18 +229,18 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
             children: [
               _buildDetailItem(
                 Icons.air,
-                'Wind',
+                '${'wind'.tr()}',
                 '${_formatSpeed(day.windSpeedMax, settings.speedUnit)} ${_getSpeedUnitSuffix(settings.speedUnit)} ${getWindDirection(day.windDirectionDominant)}',
               ),
               if (day.precipitationSum > 0) ...[
                 _buildDetailItem(
                   Icons.water_drop_outlined,
-                  'Precipitation',
+                  '${'precipitation'.tr()}',
                   formatPrecipitation(day.precipitationSum),
                 ),
                 _buildDetailItem(
                   Icons.timer_outlined,
-                  'Precip. Hours',
+                  '${'precipitation_hours'.tr()}',
                   '${day.precipitationHours.toStringAsFixed(1)} h',
                 ),
               ] else
@@ -283,7 +284,12 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
   }
 
   Widget _buildForecastItem(BuildContext context, DailyForecast day, SettingsProvider settings, {bool isSelected = false}) {
-    final dayName = DateFormat('E').format(day.date);
+    final locale = Localizations.localeOf(context);
+    // Get day name and ensure first letter is capitalized for all locales
+    var dayName = DateFormat('E', locale.toString()).format(day.date);
+    if (dayName.isNotEmpty) {
+      dayName = '${dayName[0].toUpperCase()}${dayName.substring(1)}';
+    }
     final isToday = day.date.day == DateTime.now().day;
     
     String formatTemp(double? temp) {
@@ -323,7 +329,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                isToday ? 'Today' : dayName,
+                isToday ? 'today'.tr() : dayName,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -331,7 +337,7 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
                 ),
               ),
               Text(
-                DateFormat('d MMM').format(day.date),
+                DateFormat('d MMM', Localizations.localeOf(context).toString()).format(day.date),
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
@@ -468,20 +474,20 @@ class _DailyForecastWidgetState extends State<DailyForecastWidget> {
 
   void _showWeatherIconsInfo(BuildContext context) {
     final weatherIcons = [
-      _WeatherIconInfo(Icons.wb_sunny, 'Clear sky'),
-      _WeatherIconInfo(Icons.cloud_queue, 'Partly cloudy'),
-      _WeatherIconInfo(Icons.cloud, 'Overcast'),
-      _WeatherIconInfo(Icons.foggy, 'Fog or rime fog'),
-      _WeatherIconInfo(Icons.grain, 'Drizzle/Freezing drizzle'),
-      _WeatherIconInfo(Icons.water_drop, 'Rain/Showers'),
-      _WeatherIconInfo(Icons.ac_unit, 'Freezing rain/Snow'),
-      _WeatherIconInfo(Icons.thunderstorm, 'Thunderstorm'),
+      _WeatherIconInfo(Icons.wb_sunny, 'clear_sky'.tr()),
+      _WeatherIconInfo(Icons.cloud_queue, 'partly_cloudy'.tr()),
+      _WeatherIconInfo(Icons.cloud, 'overcast'.tr()),
+      _WeatherIconInfo(Icons.foggy, 'fog_or_rime_fog'.tr()),
+      _WeatherIconInfo(Icons.grain, 'drizzle_freezing_drizzle'.tr()),
+      _WeatherIconInfo(Icons.water_drop, 'rain_showers'.tr()),
+      _WeatherIconInfo(Icons.ac_unit, 'freezing_rain_snow'.tr()),
+      _WeatherIconInfo(Icons.thunderstorm, 'thunderstorm'.tr()),
     ];
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Weather Icons Guide'),
+        title: Text('weather_icons_guide'.tr()),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

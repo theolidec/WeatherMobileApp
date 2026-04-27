@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../theme/theme_provider.dart';
 import '../../data/providers/settings_provider.dart';
-import 'package:flutter/material.dart';
+import '../widgets/language_selector.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -13,37 +14,38 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('settings').tr(),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildSectionHeader('Units'),
+          _buildSectionHeader('language'.tr()),
+          const LanguageSelector(),
+          const Divider(height: 32),
+          _buildSectionHeader('units'.tr()),
           Consumer<SettingsProvider>(
             builder: (context, settings, _) {
               return _buildUnitSelectionTile(
                 context: context,
-                title: 'Temperature Unit',
+                title: 'temperature_unit'.tr(),
                 currentValue: settings.temperatureUnit == TemperatureUnit.celsius 
-                    ? 'Celsius (°C)' 
+                    ? 'celsius_c'.tr()
                     : settings.temperatureUnit == TemperatureUnit.fahrenheit
-                        ? 'Fahrenheit (°F)'
-                        : 'Kelvin (°K)',
-                options: const ['Celsius (°C)', 'Fahrenheit (°F)', 'Kelvin (°K)'],
+                        ? 'fahrenheit_f'.tr()
+                        : 'kelvin_k'.tr(),
+                options: [
+                  'celsius_c'.tr(),
+                  'fahrenheit_f'.tr(),
+                  'kelvin_k'.tr(),
+                ],
                 onSelected: (value) {
                   TemperatureUnit unit;
-                  switch (value) {
-                    case 'Celsius (°C)':
-                      unit = TemperatureUnit.celsius;
-                      break;
-                    case 'Fahrenheit (°F)':
-                      unit = TemperatureUnit.fahrenheit;
-                      break;
-                    case 'Kelvin (°K)':
-                      unit = TemperatureUnit.kelvin;
-                      break;
-                    default:
-                      unit = TemperatureUnit.celsius;
+                  if (value == 'celsius_c'.tr()) {
+                    unit = TemperatureUnit.celsius;
+                  } else if (value == 'fahrenheit_f'.tr()) {
+                    unit = TemperatureUnit.fahrenheit;
+                  } else {
+                    unit = TemperatureUnit.kelvin;
                   }
                   settings.setTemperatureUnit(unit);
                 },
@@ -54,14 +56,17 @@ class SettingsPage extends StatelessWidget {
             builder: (context, settings, _) {
               return _buildUnitSelectionTile(
                 context: context,
-                title: 'Precipitation Unit',
+                title: 'precipitation_unit'.tr(),
                 currentValue: settings.precipitationUnit == PrecipitationUnit.mm 
-                    ? 'Millimeters (mm)' 
-                    : 'Inches (in)',
-                options: const ['Millimeters (mm)', 'Inches (in)'],
+                    ? 'millimeters_mm'.tr() 
+                    : 'inches_in'.tr(),
+                options: [
+                  'millimeters_mm'.tr(),
+                  'inches_in'.tr(),
+                ],
                 onSelected: (value) {
                   settings.setPrecipitationUnit(
-                    value == 'Millimeters (mm)' 
+                    value == 'millimeters_mm'.tr()
                         ? PrecipitationUnit.mm 
                         : PrecipitationUnit.inches,
                   );
@@ -74,33 +79,31 @@ class SettingsPage extends StatelessWidget {
               String getSpeedUnitText() {
                 switch (settings.speedUnit) {
                   case SpeedUnit.kmh:
-                    return 'km/h';
+                    return 'kmh'.tr();
                   case SpeedUnit.mph:
-                    return 'mph';
+                    return 'mph'.tr();
                   case SpeedUnit.ms:
-                    return 'm/s';
+                    return 'ms'.tr();
                 }
               }
               
               return _buildUnitSelectionTile(
                 context: context,
-                title: 'Wind Speed Unit',
+                title: 'speed_unit'.tr(),
                 currentValue: getSpeedUnitText(),
-                options: const ['km/h', 'mph', 'm/s'],
+                options: [
+                  'kmh'.tr(),
+                  'mph'.tr(),
+                  'ms'.tr(),
+                ],
                 onSelected: (value) {
                   SpeedUnit unit;
-                  switch (value) {
-                    case 'km/h':
-                      unit = SpeedUnit.kmh;
-                      break;
-                    case 'mph':
-                      unit = SpeedUnit.mph;
-                      break;
-                    case 'm/s':
-                      unit = SpeedUnit.ms;
-                      break;
-                    default:
-                      unit = SpeedUnit.kmh;
+                  if (value == 'kmh'.tr()) {
+                    unit = SpeedUnit.kmh;
+                  } else if (value == 'mph'.tr()) {
+                    unit = SpeedUnit.mph;
+                  } else {
+                    unit = SpeedUnit.ms;
                   }
                   settings.setSpeedUnit(unit);
                 },
@@ -109,39 +112,39 @@ class SettingsPage extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          _buildSectionHeader('Appearance'),
+          _buildSectionHeader('appearance'.tr()),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, _) {
               String getThemeModeName(ThemeMode mode) {
                 switch (mode) {
                   case ThemeMode.system:
-                    return 'System';
+                    return 'system_theme'.tr();
                   case ThemeMode.light:
-                    return 'Light';
+                    return 'light_theme'.tr();
                   case ThemeMode.dark:
-                    return 'Dark';
+                    return 'dark_theme'.tr();
+                  default:
+                    return 'system_theme'.tr();
                 }
               }
               
               return _buildUnitSelectionTile(
                 context: context,
-                title: 'Theme',
+                title: 'theme'.tr(),
                 currentValue: getThemeModeName(themeProvider.themeMode),
-                options: const ['System', 'Light', 'Dark'],
+                options: [
+                  'system_theme'.tr(),
+                  'light_theme'.tr(),
+                  'dark_theme'.tr(),
+                ],
                 onSelected: (value) {
                   ThemeMode mode;
-                  switch (value) {
-                    case 'System':
-                      mode = ThemeMode.system;
-                      break;
-                    case 'Light':
-                      mode = ThemeMode.light;
-                      break;
-                    case 'Dark':
-                      mode = ThemeMode.dark;
-                      break;
-                    default:
-                      mode = ThemeMode.system;
+                  if (value == 'light_theme'.tr()) {
+                    mode = ThemeMode.light;
+                  } else if (value == 'dark_theme'.tr()) {
+                    mode = ThemeMode.dark;
+                  } else {
+                    mode = ThemeMode.system;
                   }
                   themeProvider.setThemeMode(mode);
                 },
@@ -150,24 +153,58 @@ class SettingsPage extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          _buildSectionHeader('Data'),
+          _buildSectionHeader('data_privacy'.tr()),
           Consumer<SettingsProvider>(
             builder: (context, settings, _) {
-              return _buildRefreshIntervalTile(
+              String getRefreshIntervalText() {
+                final interval = settings.refreshInterval;
+                if (interval.minutes < 60) {
+                  return '${interval.minutes} ${interval.minutes == 1 ? 'minute'.tr() : 'minutes'.tr()}';
+                } else if (interval.minutes == 60) {
+                  return 'hour'.tr();
+                } else {
+                  final hours = interval.minutes ~/ 60;
+                  return '$hours ${hours == 1 ? 'hour'.tr() : 'hours'.tr()}';
+                }
+              }
+              
+              return _buildUnitSelectionTile(
                 context: context,
-                currentValue: settings.refreshInterval.displayName,
-                options: RefreshInterval.values.map((e) => e.displayName).toList(),
+                title: 'refresh_interval'.tr(),
+                currentValue: getRefreshIntervalText(),
+                options: RefreshInterval.values.map((e) {
+                  if (e.minutes < 60) {
+                    return '${e.minutes} ${e.minutes == 1 ? 'minute'.tr() : 'minutes'.tr()}';
+                  } else if (e.minutes == 60) {
+                    return 'hour'.tr();
+                  } else {
+                    final hours = e.minutes ~/ 60;
+                    return '$hours ${hours == 1 ? 'hour'.tr() : 'hours'.tr()}';
+                  }
+                }).toList(),
                 onSelected: (value) {
+                  // Find the matching RefreshInterval by comparing the display text
                   final selectedInterval = RefreshInterval.values.firstWhere(
-                    (interval) => interval.displayName == value,
+                    (interval) {
+                      String displayText;
+                      if (interval.minutes < 60) {
+                        displayText = '${interval.minutes} ${interval.minutes == 1 ? 'minute'.tr() : 'minutes'.tr()}';
+                      } else if (interval.minutes == 60) {
+                        displayText = 'hour'.tr();
+                      } else {
+                        final hours = interval.minutes ~/ 60;
+                        displayText = '$hours ${hours == 1 ? 'hour'.tr() : 'hours'.tr()}';
+                      }
+                      return displayText == value;
+                    },
                     orElse: () => RefreshInterval.fifteenMinutes,
                   );
+                  
                   settings.setRefreshInterval(selectedInterval);
                 },
               );
             },
           ),
-          
           const SizedBox(height: 24),
           _buildAppVersion(),
         ],
